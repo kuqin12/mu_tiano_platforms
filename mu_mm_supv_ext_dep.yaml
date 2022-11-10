@@ -9,6 +9,6 @@
   "name": "FEATURE_MM_SUPV",
   "var_name": "FEATURE_MM_SUPV_PATH",
   "source": "https://github.com/kuqin12/mu_feature_mm_supv.git",
-  "version": "4f53f7d2866fb87f3dbcd3dac94fac2235e426f4",
+  "version": "389300af0defc39f45d01911c74628bc13060cb1",
   "flags": ["set_build_var"]
 }
