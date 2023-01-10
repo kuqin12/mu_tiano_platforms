@@ -69,7 +69,11 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
         # Turn off S3 support
         args += " -global ICH9-LPC.disable_s3=1"
         # turn off network
-        args += " -net none"
+        args += " -no-reboot"
+        # args += " -nic model=e1000"
+        # args += " -nic tap,model=e1000,id=net0,ifname=tap0,script=no,downscript=no"
+        args += " -netdev user,id=net0,tftp=C:\Repos\mu_tiano_platforms_2\Build\QemuQ35Pkg\DEBUG_VS2022\X64\ShellPkg\Application\Shell\Shell\DEBUG\,bootfile=/Shell.efi -device e1000,netdev=net0"
+        # args += " -netdev user,id=net0 -device e1000,netdev=net0"
         # Mount disk with startup.nsh
         if os.path.isfile(VirtualDrive):
             args += f" -hdd {VirtualDrive}"

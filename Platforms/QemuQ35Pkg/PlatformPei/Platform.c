@@ -834,11 +834,11 @@ InitializePlatform (
   DxeSettings.ImageProtectionPolicy.Fields.BlockImagesWithoutNxFlag = 0;
  #endif
 
-  BuildGuidDataHob (
-    &gDxeMemoryProtectionSettingsGuid,
-    &DxeSettings,
-    sizeof (DxeSettings)
-    );
+  // BuildGuidDataHob (
+  //   &gDxeMemoryProtectionSettingsGuid,
+  //   &DxeSettings,
+  //   sizeof (DxeSettings)
+  //   );
 
   BuildGuidDataHob (
     &gMmMemoryProtectionSettingsGuid,
