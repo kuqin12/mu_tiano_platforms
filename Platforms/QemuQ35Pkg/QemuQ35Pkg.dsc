@@ -297,6 +297,9 @@
   ConfigSystemModeLib       |QemuQ35Pkg/Library/ConfigSystemModeLibQ35/ConfigSystemModeLib.inf
   ActiveProfileSelectorLib  |SetupDataPkg/Library/ActiveProfileSelectorLibNull/ActiveProfileSelectorLibNull.inf
 
+  ThreadingLib|MdeModulePkg/Library/DxeThreadingLib/DxeThreadingLib.inf
+  ThreadingStructLib|MdeModulePkg/Library/DxeThreadingStructLib/DxeThreadingStructLib.inf
+
   # Network libraries
   NetLib                 |NetworkPkg/Library/DxeNetLib/DxeNetLib.inf
   MsNetworkDependencyLib |PcBdsPkg/Library/MsNetworkDependencyLib/MsNetworkDependencyLib.inf # Library that is attached to drivers that require networking.
@@ -915,6 +918,8 @@ PlatformSmmProtectionsTestLib|UefiTestingPkg/Library/PlatformSmmProtectionsTestL
   gUefiQemuQ35PkgTokenSpaceGuid.PcdOvmfFlashVariablesEnable|TRUE
   gUefiQemuQ35PkgTokenSpaceGuid.PcdOvmfHostBridgePciDevId|0x29C0
 
+  gEfiNetworkPkgTokenSpaceGuid.PcdPxeTftpWindowSize|0
+
 [PcdsFixedAtBuild.IA32]
   #
   # The NumberOfPages values below are ad-hoc. They are updated sporadically at
@@ -1197,6 +1202,11 @@ PlatformSmmProtectionsTestLib|UefiTestingPkg/Library/PlatformSmmProtectionsTestL
       PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   }
 
+  #
+  # Threading Support
+  #
+  MdeModulePkg/Universal/ThreadingDxe/ThreadingDxe.inf
+
   MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
 
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf {
@@ -1319,36 +1329,37 @@ PlatformSmmProtectionsTestLib|UefiTestingPkg/Library/PlatformSmmProtectionsTestL
   # Network Support
   #
 
-  NetworkPkg/DpcDxe/DpcDxe.inf
+  # NetworkPkg/DpcDxe/DpcDxe.inf
 
   NetworkPkg/SnpDxe/SnpDxe.inf
-  NetworkPkg/MnpDxe/MnpDxe.inf
+  # NetworkPkg/MnpDxe/MnpDxe.inf
 
-  NetworkPkg/ArpDxe/ArpDxe.inf
-  NetworkPkg/Dhcp4Dxe/Dhcp4Dxe.inf
-  NetworkPkg/Ip4Dxe/Ip4Dxe.inf
-  NetworkPkg/Udp4Dxe/Udp4Dxe.inf
+  # NetworkPkg/ArpDxe/ArpDxe.inf
+  # NetworkPkg/Dhcp4Dxe/Dhcp4Dxe.inf
+  # NetworkPkg/Ip4Dxe/Ip4Dxe.inf
+  # NetworkPkg/Udp4Dxe/Udp4Dxe.inf
   NetworkPkg/Mtftp4Dxe/Mtftp4Dxe.inf
 
 
-  NetworkPkg/Dhcp6Dxe/Dhcp6Dxe.inf
-  NetworkPkg/Ip6Dxe/Ip6Dxe.inf
-  NetworkPkg/Udp6Dxe/Udp6Dxe.inf
-  NetworkPkg/Mtftp6Dxe/Mtftp6Dxe.inf
+  # NetworkPkg/Dhcp6Dxe/Dhcp6Dxe.inf
+  # NetworkPkg/Ip6Dxe/Ip6Dxe.inf
+  # NetworkPkg/Udp6Dxe/Udp6Dxe.inf
+  # NetworkPkg/Mtftp6Dxe/Mtftp6Dxe.inf
 
 
-  NetworkPkg/TcpDxe/TcpDxe.inf
-  NetworkPkg/UefiPxeBcDxe/UefiPxeBcDxe.inf
+  # NetworkPkg/TcpDxe/TcpDxe.inf
+  # NetworkPkg/UefiPxeBcDxe/UefiPxeBcDxe.inf
 
-  NetworkPkg/TlsDxe/TlsDxe.inf
-  NetworkPkg/TlsAuthConfigDxe/TlsAuthConfigDxe.inf
+  # NetworkPkg/TlsDxe/TlsDxe.inf
+  # NetworkPkg/TlsAuthConfigDxe/TlsAuthConfigDxe.inf
 
-  NetworkPkg/DnsDxe/DnsDxe.inf
-  NetworkPkg/HttpDxe/HttpDxe.inf
-  NetworkPkg/HttpUtilitiesDxe/HttpUtilitiesDxe.inf
-  NetworkPkg/HttpBootDxe/HttpBootDxe.inf
+  # NetworkPkg/DnsDxe/DnsDxe.inf
+  # NetworkPkg/HttpDxe/HttpDxe.inf
+  # NetworkPkg/HttpUtilitiesDxe/HttpUtilitiesDxe.inf
+  # NetworkPkg/HttpBootDxe/HttpBootDxe.inf
+  NetworkPkg/MpTcpIpDxe/MpTcpIpDxe.inf
 
-  QemuQ35Pkg/VirtioNetDxe/VirtioNet.inf
+  # QemuQ35Pkg/VirtioNetDxe/VirtioNet.inf
   NetworkPkg/UefiPxeBcDxe/UefiPxeBcDxe.inf {
     <LibraryClasses>
       NULL|QemuQ35Pkg/Library/PxeBcPcdProducerLib/PxeBcPcdProducerLib.inf
