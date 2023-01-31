@@ -68,12 +68,18 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
         args += " -global isa-debugcon.iobase=0x402"
         # Turn off S3 support
         args += " -global ICH9-LPC.disable_s3=1"
-        # turn off network
+        # Turn off reboot in case we miss any exceptions
         args += " -no-reboot"
-        # args += " -nic model=e1000"
-        # args += " -nic tap,model=e1000,id=net0,ifname=tap0,script=no,downscript=no"
-        args += " -netdev user,id=net0,tftp=C:\Repos\mu_tiano_platforms_2\Build\QemuQ35Pkg\DEBUG_VS2022\X64\ShellPkg\Application\Shell\Shell\DEBUG\,bootfile=/Shell.efi -device e1000,netdev=net0"
-        # args += " -netdev user,id=net0 -device e1000,netdev=net0"
+
+        # Prepare PXE folder and boot file, default to Shell.efi from build directory
+        pxe_path = env.GetValue("PXE_FOLDER_PATH")
+        pxe_file = env.GetValue("PXE_BOOT_FILE")
+        if pxe_path is None or pxe_file is None:
+            pxe_path = os.path.join(env.GetValue("BUILD_OUTPUT_BASE"), "X64")
+            pxe_file = "Shell.efi"
+
+        # Enable e1000 as nic and setup the TFTP server for pxe boot
+        args += f" -netdev user,id=net0,tftp={pxe_path},bootfile={pxe_file} -device e1000,netdev=net0"
         # Mount disk with startup.nsh
         if os.path.isfile(VirtualDrive):
             args += f" -hdd {VirtualDrive}"
