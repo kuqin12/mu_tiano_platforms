@@ -184,7 +184,7 @@ class SettingsManager(UpdateSettingsManager, SetupSettingsManager, PrEvalSetting
     # ####################################################################################### #
 class PlatformBuilder(UefiBuilder, BuildSettingsManager):
     def __init__(self):
-        os.environ['PYTOOL_IGNORE_KNOWN_BAD_NESTED_PACKAGES'] = 'NetworkPkg'
+        os.environ['PYTOOL_TEMPORARILY_IGNORE_NESTED_EDK_PACKAGES'] = 'true'
         UefiBuilder.__init__(self)
 
     def AddCommandLineOptions(self, parserObj):
