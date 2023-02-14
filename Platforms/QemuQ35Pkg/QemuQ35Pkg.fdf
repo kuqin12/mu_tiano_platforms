@@ -501,7 +501,7 @@ INF  DfciPkg/Application/DfciMenu/DfciMenu.inf
 INF  MsGraphicsPkg/PrintScreenLogger/PrintScreenLogger.inf
 INF  SecurityPkg/Hash2DxeCrypto/Hash2DxeCrypto.inf
 INF  MsCorePkg/AcpiRGRT/AcpiRgrt.inf
-INF  SetupDataPkg/ConfProfileMgrDxe/ConfProfileMgrDxe.inf
+# INF  SetupDataPkg/ConfProfileMgrDxe/ConfProfileMgrDxe.inf
 
 #SHARED_CRYPTO Crypto Bin Modules
 !if $(ENABLE_SHARED_CRYPTO) == TRUE
