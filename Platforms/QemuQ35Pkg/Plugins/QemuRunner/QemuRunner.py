@@ -68,8 +68,17 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
         args += " -global isa-debugcon.iobase=0x402"
         # Turn off S3 support
         args += " -global ICH9-LPC.disable_s3=1"
-        # turn off network
-        args += " -net none"
+
+        # Prepare PXE folder and boot file, default to Shell.efi from build directory
+        pxe_path = env.GetValue("PXE_FOLDER_PATH")
+        pxe_file = env.GetValue("PXE_BOOT_FILE")
+        if pxe_path is None or pxe_file is None:
+            pxe_path = os.path.join(env.GetValue("BUILD_OUTPUT_BASE"), "X64")
+            pxe_file = "Shell.efi"
+
+        # Enable e1000 as nic and setup the TFTP server for pxe boot
+        args += f" -netdev user,id=net0,tftp={pxe_path},bootfile={pxe_file} -device e1000,netdev=net0"
+        # args += f" -object filter-dump,id=f1,netdev=net0,file=dump.dat"
         # Mount disk with startup.nsh
         if os.path.isfile(VirtualDrive):
             args += f" -hdd {VirtualDrive}"
