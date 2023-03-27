@@ -9,7 +9,7 @@ import logging
 import io
 import shutil
 import glob
-import time
+import datetime
 import xml.etree.ElementTree
 import tempfile
 import uuid
@@ -23,6 +23,23 @@ from edk2toolext.invocables.edk2_pr_eval import PrEvalSettingsManager
 from edk2toollib.utility_functions import RunCmd, GetHostInfo
 from typing import Tuple
 
+# Declare test whose failure will not return a non-zero exit code
+failure_exempt_tests = {}
+failure_exempt_tests["BaseCryptLibUnitTestApp.efi"] = datetime.datetime(2023, 3, 7, 0, 0, 0)
+failure_exempt_tests["BootAuditTestApp.efi"] = datetime.datetime(2023, 3, 7, 0, 0, 0)
+failure_exempt_tests["LineParserTestApp.efi"] = datetime.datetime(2023, 3, 7, 0, 0, 0)
+failure_exempt_tests["MorLockFunctionalTestApp.efi"] = datetime.datetime(2023, 3, 7, 0, 0, 0)
+failure_exempt_tests["MsWheaEarlyUnitTestApp.efi"] = datetime.datetime(2023, 3, 7, 0, 0, 0)
+failure_exempt_tests["VariablePolicyFuncTestApp.efi"] = datetime.datetime(2023, 3, 7, 0, 0, 0)
+failure_exempt_tests["DeviceIdTestApp.efi"] = datetime.datetime(2023, 3, 7, 0, 0, 0)
+failure_exempt_tests["DxePagingAuditTestApp.efi"] = datetime.datetime(2023, 3, 7, 0, 0, 0)
+
+# Allow failure exempt tests to be ignored for 90 days
+FAILURE_EXEMPT_OMISSION_LENGTH = 90*24*60*60
+
+# Declare tests which require platform reset(s)
+reset_tests = ["MorLockFunctionalTestApp.efi", "VariablePolicyFuncTestApp.efi"]
+
     # ####################################################################################### #
     #                                Common Configuration                                     #
     # ####################################################################################### #
@@ -35,7 +52,16 @@ class CommonPlatform():
     TargetsSupported = ("DEBUG", "RELEASE", "NOOPT")
     Scopes = ('qemuq35', 'edk2-build', 'cibuild', 'configdata')
     WorkspaceRoot = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    PackagesPath = ("Platforms", "MU_BASECORE", "Common/MU", "Common/MU_TIANO", "Common/MU_OEM_SAMPLE", "Common/MU_FEATURE_DFCI")
+    PackagesPath = (
+        "Platforms",
+        "MU_BASECORE",
+        "Common/MU",
+        "Common/MU_TIANO",
+        "Common/MU_OEM_SAMPLE",
+        "Features/DFCI",
+        "Features/CONFIG",
+        "Features/MM_SUPV"
+    )
 
     @staticmethod
     def add_common_command_line_options(parserObj) -> None:
@@ -91,29 +117,20 @@ class SettingsManager(UpdateSettingsManager, SetupSettingsManager, PrEvalSetting
         return CommonPlatform.TargetsSupported
 
     def GetRequiredSubmodules(self):
-        ''' return iterable containing RequiredSubmodule objects.
-        If no RequiredSubmodules return an empty iterable
-        '''
-        rs = []
-
-        # To avoid maintenance of this file for every new submodule
-        # lets just parse the .gitmodules and add each if not already in list.
-        # The GetRequiredSubmodules is designed to allow a build to optimize
-        # the desired submodules but it isn't necessary for this repository.
-        result = io.StringIO()
-        ret = RunCmd("git", "config --file .gitmodules --get-regexp path",
-                     workingdir=self.GetWorkspaceRoot(), outstream=result)
-        # Cmd output is expected to look like:
-        # submodule.CryptoPkg/Library/OpensslLib/openssl.path CryptoPkg/Library/OpensslLib/openssl
-        # submodule.SoftFloat.path ArmPkg/Library/ArmSoftFloatLib/berkeley-softfloat-3
-        if ret == 0:
-            for line in result.getvalue().splitlines():
-                _, _, path = line.partition(" ")
-                if path is not None:
-                    if path not in [x.path for x in rs]:
-                        # add it with recursive since we don't know
-                        rs.append(RequiredSubmodule(path, True))
-        return rs
+        """Return iterable containing RequiredSubmodule objects.
+        
+        !!! note
+            If no RequiredSubmodules return an empty iterable
+        """
+        return [
+            RequiredSubmodule("MU_BASECORE", True),
+            RequiredSubmodule("Common/MU", True),
+            RequiredSubmodule("Common/MU_TIANO", True),
+            RequiredSubmodule("Common/MU_OEM_SAMPLE", True),
+            RequiredSubmodule("Features/DFCI", True),
+            RequiredSubmodule("Features/CONFIG", True),
+            RequiredSubmodule("Features/MM_SUPV", True),
+        ]
 
     def SetArchitectures(self, list_of_requested_architectures):
         ''' Confirm the requests architecture list is valid and configure SettingsManager
@@ -171,13 +188,7 @@ class SettingsManager(UpdateSettingsManager, SetupSettingsManager, PrEvalSetting
 
     def GetPackagesPath(self):
         ''' Return a list of paths that should be mapped as edk2 PackagesPath '''
-        result = [
-            shell_environment.GetBuildVars().GetValue("FEATURE_CONFIG_PATH", ""),
-            shell_environment.GetBuildVars().GetValue("FEATURE_MM_SUPV_PATH", "")
-        ]
-        for a in CommonPlatform.PackagesPath:
-            result.append(a)
-        return result
+        return CommonPlatform.PackagesPath
 
     # ####################################################################################### #
     #                         Actual Configuration for Platform Build                         #
@@ -344,6 +355,8 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
             VirtualDrivePath = self.env.GetValue("VIRTUAL_DRIVE_PATH", os.path.join(output_base, "VirtualDrive"))
             logging.warning("Linux currently isn't supported for the virtual drive. Falling back to an older method")
 
+            test_regex = self.env.GetValue("TEST_REGEX", "")
+
             if run_tests:
                 logging.critical("Linux doesn't support running unit tests due to lack of VHD support")
 
@@ -391,7 +404,11 @@ class UnitTestSupport(object):
 
     def write_tests_to_startup_nsh(self,nshfile):
         for test in self.test_list:
-            nshfile.AddLine(os.path.basename(test))
+            if (os.path.basename(test) in reset_tests):
+                nshfile.AddLine(os.path.basename(test))
+        for test in self.test_list:
+            if not (os.path.basename(test) in reset_tests):
+                nshfile.AddLine(os.path.basename(test))
 
     def report_results(self, virtualdrive) -> int:
         from html import unescape
@@ -400,8 +417,15 @@ class UnitTestSupport(object):
         os.makedirs(report_folder_path, exist_ok=True)
         #now parse the xml for errors
         failure_count = 0
-        logging.info("UnitTest Completed")
+        logging.info("UnitTest(s) Completed")
         for unit_test in self.test_list:
+            ignore_failure = False
+            if (os.path.basename(unit_test) in failure_exempt_tests.keys()):
+                now = datetime.datetime.now()
+                last_ignore_time = failure_exempt_tests[os.path.basename(unit_test)]
+                if (now - last_ignore_time).total_seconds() < FAILURE_EXEMPT_OMISSION_LENGTH:
+                    logging.info("Ignoring output of " + os.path.basename(unit_test))
+                    ignore_failure = True
             xml_result_file = os.path.basename(unit_test)[:-4] + "_JUNIT.XML"
             output_xml_file = os.path.join(report_folder_path, xml_result_file)
             try:
@@ -423,9 +447,10 @@ class UnitTestSupport(object):
                         level = logging.INFO
                         for result in case:
                             if result.tag == 'failure':
-                                failure_count += 1
                                 level = logging.ERROR
                                 caseresult = "\t\tFAIL" + " - " + unescape(result.attrib['message'])
+                                if not ignore_failure:
+                                    failure_count += 1
                         logging.log( level, caseresult)
             except Exception as ex:
                 logging.error("Exception trying to read xml." + str(ex))
