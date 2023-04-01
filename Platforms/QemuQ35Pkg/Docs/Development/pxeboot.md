@@ -51,5 +51,12 @@ Note: Not setting these options will leaven them as default, which is set to PXE
     - A [staging branch change in DXE core](https://github.com/tianocore/edk2-staging/commit/a177b463201b1152f04557e71196c7fe13fdb2f4#diff-59ad9c9deae518651b9c763ad1ffdf86f552c79e884b65215a03861e352a2206)
     could cause self recursion on the protocol spin lock acquisition and block the system from booting.
 
-1. The PXE boot may not always succeed. It is possible to run into page fault on secondary cores during data downloading
-process. This issue is still under investigation could be caused by the QEMU undi driver not thread safe.
+1. The PXE boot may not always succeed. It is possible to run into general protection fault or hang on secondary cores during
+.wim downloading process. This issue is still under investigation and could be caused by the QEMU undi driver not thread
+safe.
+
+The work in progress for possible iPXE work is maintained in [this branch](https://github.com/kuqin12/ipxe/test_mp_release)
+and currently this platform branch carries a efi rom build from that WIP iPXE through [extdep](../../Binaries/q35_pxe_rom_ext_dep.yaml).
+
+1. The QEMU run will always generate a dump file as dump.dat that can be opened through WireShark to facilitate the network
+package troubleshooting.

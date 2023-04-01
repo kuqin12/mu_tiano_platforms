@@ -12,3 +12,4 @@ UefiDbgExt/x64/
 *.vcxproj.user
 /Conf/
 /**/Include/Generated/**
+/Platforms/**/dump.dat
