@@ -29,7 +29,7 @@
   PeiServicesLib               |MdePkg/Library/PeiServicesLib/PeiServicesLib.inf
   BaseBinSecurityLib           |MdePkg/Library/BaseBinSecurityLibNull/BaseBinSecurityLibNull.inf
   HiiLib                       |MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
- 
+
   # Services tables/Entry points
   UefiBootServicesTableLib    |MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
   UefiRuntimeServicesTableLib |MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
