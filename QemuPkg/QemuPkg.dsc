@@ -14,7 +14,7 @@
   SUPPORTED_ARCHITECTURES        = IA32|X64|EBC|ARM|AARCH64|RISCV64
   BUILD_TARGETS                  = DEBUG|RELEASE|NOOPT
   SKUID_IDENTIFIER               = DEFAULT
-
+ 
 [LibraryClasses.common]
   DebugLib                     |MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
   BaseLib                      |MdePkg/Library/BaseLib/BaseLib.inf
