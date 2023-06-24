@@ -23,7 +23,7 @@ name: Update Release Draft
 on:
   push:
     branches:
-      - main
+      - add_arm_build_test
 
 jobs:
   draft:
