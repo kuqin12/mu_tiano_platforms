@@ -1293,6 +1293,8 @@
   MsGraphicsPkg/MsEarlyGraphics/Dxe/MsEarlyGraphics.inf
   MsWheaPkg/MsWheaReport/Dxe/MsWheaReportDxe.inf
   MsWheaPkg/MsWheaReport/Smm/MsWheaReportStandaloneMm.inf
+  MmSupervisorPkg/Drivers/HestMmErrorSources/HestErrorSourceDxe.inf
+  ArmPlatformPkg/Drivers/Apei/HestDxe/HestDxe.inf
   MdeModulePkg/Universal/ReportStatusCodeRouter/Smm/ReportStatusCodeRouterStandaloneMm.inf
   MsCorePkg/Universal/StatusCodeHandler/Serial/Smm/SerialStatusCodeHandlerSmm.inf
   MdeModulePkg/Universal/Acpi/FirmwarePerformanceDataTableSmm/FirmwarePerformanceStandaloneMm.inf
