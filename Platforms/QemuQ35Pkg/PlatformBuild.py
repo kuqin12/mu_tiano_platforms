@@ -57,7 +57,8 @@ class CommonPlatform():
         "Common/MU_OEM_SAMPLE",
         "Features/DFCI",
         "Features/CONFIG",
-        "Features/MM_SUPV"
+        "Features/MM_SUPV",
+        "Silicon/Arm/MU_TIANO"
     )
 
     @staticmethod

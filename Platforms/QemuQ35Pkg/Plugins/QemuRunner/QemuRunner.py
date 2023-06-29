@@ -91,7 +91,7 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
             # Potentially dealing with big daddy, give it more juice...
             args += " -m 8192"
             #args += " -hda \"" + path_to_os + "\""
-            args += " -drive format=raw,index=0,media=disk,file=\"" + path_to_os + "\""
+            args += " -drive index=0,media=disk,file=\"" + path_to_os + "\""
         else:
             args += " -m 2048"
 
