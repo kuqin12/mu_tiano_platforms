@@ -8,14 +8,13 @@
 
 import logging
 import os
-import sys
-import time
 import threading
 import datetime
 import subprocess
 import re
 import io
 import shutil
+from pathlib import Path
 from edk2toolext.environment import plugin_manager
 from edk2toolext.environment.plugintypes import uefi_helper_plugin
 from edk2toollib import utility_functions
@@ -56,13 +55,13 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
         ''' Runs QEMU '''
         VirtualDrive = env.GetValue("VIRTUAL_DRIVE_PATH")
         OutputPath_FV = os.path.join(env.GetValue("BUILD_OUTPUT_BASE"), "FV")
-        version = env.GetValue("VERSION", "Unknown")
+        repo_version = env.GetValue("VERSION", "Unknown")
 
         # Check if QEMU is on the path, if not find it
         executable = "qemu-system-x86_64"
 
         # First query the version
-        ver = QemuRunner.QueryQemuVersion(executable)
+        qemu_version = QemuRunner.QueryQemuVersion(executable)
 
         # write messages to stdio
         args = "-debugcon stdio"
@@ -90,8 +89,18 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
         if path_to_os is not None:
             # Potentially dealing with big daddy, give it more juice...
             args += " -m 8192"
-            #args += " -hda \"" + path_to_os + "\""
-            args += " -drive index=0,media=disk,file=\"" + path_to_os + "\""
+
+            file_extension = Path(path_to_os).suffix.lower().replace('"', '')
+
+            storage_rule = {
+                ".vhd": f" -drive format=raw,index=0,media=disk,file=\"{path_to_os}\"",
+                ".qcow2": f" -hda \"{path_to_os}\""
+            }.get(file_extension, None)
+
+            if storage_rule is None:
+                raise Exception("Unknown OS storage type: " + path_to_os)
+
+            args += storage_rule
         else:
             args += " -m 2048"
 
@@ -102,8 +111,10 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
             args += " -smp " + env.GetBuildValue ("QEMU_CORE_NUM")
         if smm_enabled == "on":
             args += " -global driver=cfi.pflash01,property=secure,value=on"
+
+        code_fd = os.path.join(OutputPath_FV, "QEMUQ35_CODE.fd")
         args += " -drive if=pflash,format=raw,unit=0,file=" + \
-            os.path.join(OutputPath_FV, "QEMUQ35_CODE.fd") + ",readonly=on"
+                code_fd + ",readonly=on"
 
         orig_var_store = os.path.join(OutputPath_FV, "QEMUQ35_VARS.fd")
         dfci_var_store =env.GetValue("DFCI_VAR_STORE")
@@ -117,8 +128,8 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
 
         # Add XHCI USB controller and mouse
         args += " -device qemu-xhci,id=usb"
-        args += " -device usb-mouse,id=input0,bus=usb.0,port=1"  # add a usb mouse
-        #args += " -device usb-kbd,id=input1,bus=usb.0,port=2"    # add a usb keyboar
+        args += " -device usb-tablet,id=input0,bus=usb.0,port=1"  # add a usb mouse
+        #args += " -device usb-kbd,id=input1,bus=usb.0,port=2"    # add a usb keyboard
 
         dfci_files = env.GetValue("DFCI_FILES")
         if dfci_files is not None:
@@ -164,9 +175,20 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
             # forward ports for robotframework 8270 and 8271
             args += " -netdev user,id=net0,hostfwd=tcp::8270-:8270,hostfwd=tcp::8271-:8271"
 
-        args += " -smbios type=0,vendor=Palindrome,uefi=on"
-        args += " -smbios type=1,manufacturer=Palindrome,product=MuQemuQ35,serial=42-42-42-42,uuid=9de555c0-05d7-4aa1-84ab-bb511e3a8bef"
+        creation_time = Path(code_fd).stat().st_ctime
+        creation_datetime = datetime.datetime.fromtimestamp(creation_time)
+        creation_date = creation_datetime.strftime("%m/%d/%Y")
+
+        args += f" -smbios type=0,vendor=\"Project Mu\",version=\"mu_tiano_platforms-{repo_version}\",date={creation_date},uefi=on"
+        args += f" -smbios type=1,manufacturer=Palindrome,product=\"QEMU Q35\",family=QEMU,version=\"{'.'.join(qemu_version)}\",serial=42-42-42-42,uuid=9de555c0-05d7-4aa1-84ab-bb511e3a8bef"
         args += f" -smbios type=3,manufacturer=Palindrome,serial=40-41-42-43{boot_selection}"
+
+        # TPM in Linux
+        tpm_dev = env.GetValue("TPM_DEV")
+        if tpm_dev is not None:
+            args += f" -chardev socket,id=chrtpm,path={tpm_dev}"
+            args += " -tpmdev emulator,id=tpm0,chardev=chrtpm"
+            args += " -device tpm-tis,tpmdev=tpm0"
 
         if (env.GetValue("QEMU_HEADLESS").upper() == "TRUE"):
             args += " -display none"  # no graphics
@@ -201,7 +223,7 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
             ret = 0
 
         ## TODO: remove this once we upgrade to newer QEMU
-        if ret == 0x8B and ver[0] == '4':
+        if ret == 0x8B and qemu_version[0] == '4':
             # QEMU v4 will return segmentation fault when shutting down.
             # Tested same FDs on QEMU 6 and 7, not observing the same.
             ret = 0
