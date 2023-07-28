@@ -46,3 +46,6 @@
   gUefiQemuQ35PkgTokenSpaceGuid.PcdPciMmio32Size
   gUefiQemuQ35PkgTokenSpaceGuid.PcdPciMmio64Base
   gUefiQemuQ35PkgTokenSpaceGuid.PcdPciMmio64Size
+
+[Depex]
+  gEfiPciHostBridgeLibPlatformDepex
