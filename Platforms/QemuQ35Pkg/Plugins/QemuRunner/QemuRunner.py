@@ -73,6 +73,9 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
 
         if env.GetBuildValue("SMM_ENABLED") is None or env.GetBuildValue("SMM_ENABLED").lower() == "true":
             smm_enabled = "on"
+        else:
+            smm_enabled = "off"
+
         # Turn off reboot in case we miss any exceptions
         args += " -no-reboot"
 
@@ -88,13 +91,6 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
         args += f" -netdev user,id=net0,tftp={pxe_path},bootfile={pxe_file} "\
                 f"-device e1000,netdev=net0,romfile={pxe_rom} "\
                 "-object filter-dump,id=f1,netdev=net0,file=dump.dat"
-        # Mount disk with startup.nsh
-        if os.path.isfile(VirtualDrive):
-            args += f" -hdd {VirtualDrive}"
-        elif os.path.isdir(VirtualDrive):
-            args += f" -drive file=fat:rw:{VirtualDrive},format=raw,media=disk"
-        else:
-            smm_enabled = "off"
 
         accel = ""
         if env.GetValue("QEMU_ACCEL") is not None:
