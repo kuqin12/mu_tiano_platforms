@@ -8,13 +8,13 @@
 
 import logging
 import os
-import sys
-import time
 import threading
 import datetime
 import subprocess
 import re
 import io
+import shutil
+from pathlib import Path
 from edk2toolext.environment import plugin_manager
 from edk2toolext.environment import shell_environment
 from edk2toolext.environment.plugintypes import uefi_helper_plugin
@@ -56,12 +56,13 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
         ''' Runs QEMU '''
         VirtualDrive = env.GetValue("VIRTUAL_DRIVE_PATH")
         OutputPath_FV = os.path.join(env.GetValue("BUILD_OUTPUT_BASE"), "FV")
+        repo_version = env.GetValue("VERSION", "Unknown")
 
         # Check if QEMU is on the path, if not find it
         executable = "qemu-system-x86_64"
 
         # First query the version
-        ver = QemuRunner.QueryQemuVersion(executable)
+        qemu_version = QemuRunner.QueryQemuVersion(executable)
 
         # write messages to stdio
         args = "-debugcon stdio"
@@ -69,6 +70,9 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
         args += " -global isa-debugcon.iobase=0x402"
         # Turn off S3 support
         args += " -global ICH9-LPC.disable_s3=1"
+
+        if env.GetBuildValue("SMM_ENABLED") is None or env.GetBuildValue("SMM_ENABLED").lower() == "true":
+            smm_enabled = "on"
         # Turn off reboot in case we miss any exceptions
         args += " -no-reboot"
 
@@ -90,29 +94,122 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
         elif os.path.isdir(VirtualDrive):
             args += f" -drive file=fat:rw:{VirtualDrive},format=raw,media=disk"
         else:
-            logging.critical("Virtual Drive Path Invalid")
+            smm_enabled = "off"
 
-        args += " -machine q35,smm=on" #,accel=(tcg|kvm)"
-        if env.GetValue("PATH_TO_OS") is not None:
+        accel = ""
+        if env.GetValue("QEMU_ACCEL") is not None:
+            if env.GetValue("QEMU_ACCEL").lower() == "kvm":
+                accel = ",accel=kvm"
+            elif env.GetValue("QEMU_ACCEL").lower() == "tcg":
+                accel = ",accel=tcg"
+            elif env.GetValue("QEMU_ACCEL").lower() == "whpx":
+                accel = ",accel=whpx"
+
+        args += " -machine q35,smm=" + smm_enabled + accel
+        path_to_os = env.GetValue("PATH_TO_OS")
+        if path_to_os is not None:
             # Potentially dealing with big daddy, give it more juice...
             args += " -m 8192"
-            args += " -hda \"" + env.GetValue("PATH_TO_OS") + "\""
+
+            file_extension = Path(path_to_os).suffix.lower().replace('"', '')
+
+            storage_rule = {
+                ".vhd": f" -drive format=raw,index=0,media=disk,file=\"{path_to_os}\"",
+                ".qcow2": f" -hda \"{path_to_os}\""
+            }.get(file_extension, None)
+
+            if storage_rule is None:
+                raise Exception("Unknown OS storage type: " + path_to_os)
+
+            args += storage_rule
         else:
             args += " -m 2048"
-        args += " -cpu qemu64,+rdrand,umip,+smep" # most compatible x64 CPU model + RDRAND + UMIP + SMEP support (not included by default)
+
+        #args += " -cpu qemu64,+rdrand,umip,+smep,+popcnt" # most compatible x64 CPU model + RDRAND + UMIP + SMEP +POPCNT support (not included by default)
+        args += " -cpu qemu64,rdrand=on,umip=on,smep=on,pdpe1gb=on,popcnt=on" # most compatible x64 CPU model + RDRAND + UMIP + SMEP + PDPE1GB + POPCNT support (not included by default)
+
         if env.GetBuildValue ("QEMU_CORE_NUM") is not None:
-          args += " -smp " + env.GetBuildValue ("QEMU_CORE_NUM")
-        args += " -global driver=cfi.pflash01,property=secure,value=on"
+            args += " -smp " + env.GetBuildValue ("QEMU_CORE_NUM")
+        if smm_enabled == "on":
+            args += " -global driver=cfi.pflash01,property=secure,value=on"
+
+        code_fd = os.path.join(OutputPath_FV, "QEMUQ35_CODE.fd")
         args += " -drive if=pflash,format=raw,unit=0,file=" + \
-            os.path.join(OutputPath_FV, "QEMUQ35_CODE.fd") + ",readonly=on"
-        args += " -drive if=pflash,format=raw,unit=1,file=" + \
-            os.path.join(OutputPath_FV, "QEMUQ35_VARS.fd")
+                code_fd + ",readonly=on"
+
+        orig_var_store = os.path.join(OutputPath_FV, "QEMUQ35_VARS.fd")
+        dfci_var_store =env.GetValue("DFCI_VAR_STORE")
+        if dfci_var_store is not None:
+            if not os.path.isfile(dfci_var_store):
+                shutil.copy(orig_var_store, dfci_var_store)
+            use_this_varstore = dfci_var_store
+        else:
+            use_this_varstore = orig_var_store
+        args += " -drive if=pflash,format=raw,unit=1,file=" + use_this_varstore
 
         # Add XHCI USB controller and mouse
         args += " -device qemu-xhci,id=usb"
-        args += " -device usb-mouse,id=input0,bus=usb.0,port=1"  # add a usb mouse
-        #args += " -device usb-kbd,id=input1,bus=usb.0,port=2"    # add a usb keyboar
-        args += " -smbios type=0,vendor=Palindrome,uefi=on -smbios type=1,manufacturer=Palindrome,product=MuQemuQ35,serial=42-42-42-42"
+        args += " -device usb-tablet,id=input0,bus=usb.0,port=1"  # add a usb mouse
+        #args += " -device usb-kbd,id=input1,bus=usb.0,port=2"    # add a usb keyboard
+
+        dfci_files = env.GetValue("DFCI_FILES")
+        if dfci_files is not None:
+            args += f" -drive file=fat:rw:{dfci_files},format=raw,media=disk,if=none,id=dfci_disk"
+            args += " -device usb-storage,bus=usb.0,drive=dfci_disk"
+
+        install_files = env.GetValue("INSTALL_FILES")
+        if install_files is not None:
+            args += f" -drive file={install_files},format=raw,media=disk,if=none,id=install_disk"
+            args += " -device usb-storage,bus=usb.0,drive=install_disk"
+
+        boot_selection = ''
+        boot_to_front_page = env.GetValue("BOOT_TO_FRONT_PAGE")
+        if boot_to_front_page is not None:
+            if (boot_to_front_page.upper() == "TRUE"):
+                boot_selection += ",version=Vol+"
+
+        alt_boot_enable = env.GetValue("ALT_BOOT_ENABLE")
+        if alt_boot_enable is not None:
+            if alt_boot_enable.upper() == "TRUE":
+                boot_selection += ",version=Vol-"
+
+        # If DFCI_VAR_STORE is enabled, don't enable the Virtual Drive, and enable the network
+        dfci_var_store = env.GetValue("DFCI_VAR_STORE")
+        if dfci_var_store is None:
+            # turn off network
+            args += " -net none"
+            # Mount disk with startup.nsh
+            if os.path.isfile(VirtualDrive):
+                args += f" -hdd {VirtualDrive}"
+            elif os.path.isdir(VirtualDrive):
+                args += f" -drive file=fat:rw:{VirtualDrive},format=raw,media=disk"
+            else:
+                logging.critical("Virtual Drive Path Invalid")
+        else:
+            if boot_to_front_page is None:
+                # Booting to Windows, use a PCI nic
+                args += " -device e1000,netdev=net0"
+            else:
+                # Booting to UEFI, use virtio-net-pci
+                args += " -device virtio-net-pci,netdev=net0"
+
+            # forward ports for robotframework 8270 and 8271
+            args += " -netdev user,id=net0,hostfwd=tcp::8270-:8270,hostfwd=tcp::8271-:8271"
+
+        creation_time = Path(code_fd).stat().st_ctime
+        creation_datetime = datetime.datetime.fromtimestamp(creation_time)
+        creation_date = creation_datetime.strftime("%m/%d/%Y")
+
+        args += f" -smbios type=0,vendor=\"Project Mu\",version=\"mu_tiano_platforms-{repo_version}\",date={creation_date},uefi=on"
+        args += f" -smbios type=1,manufacturer=Palindrome,product=\"QEMU Q35\",family=QEMU,version=\"{'.'.join(qemu_version)}\",serial=42-42-42-42,uuid=9de555c0-05d7-4aa1-84ab-bb511e3a8bef"
+        args += f" -smbios type=3,manufacturer=Palindrome,serial=40-41-42-43{boot_selection}"
+
+        # TPM in Linux
+        tpm_dev = env.GetValue("TPM_DEV")
+        if tpm_dev is not None:
+            args += f" -chardev socket,id=chrtpm,path={tpm_dev}"
+            args += " -tpmdev emulator,id=tpm0,chardev=chrtpm"
+            args += " -device tpm-tis,tpmdev=tpm0"
 
         if (env.GetValue("QEMU_HEADLESS").upper() == "TRUE"):
             args += " -display none"  # no graphics
@@ -147,7 +244,7 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
             ret = 0
 
         ## TODO: remove this once we upgrade to newer QEMU
-        if ret == 0x8B and ver[0] == '4':
+        if ret == 0x8B and qemu_version[0] == '4':
             # QEMU v4 will return segmentation fault when shutting down.
             # Tested same FDs on QEMU 6 and 7, not observing the same.
             ret = 0

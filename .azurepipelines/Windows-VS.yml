@@ -1,5 +1,8 @@
 ## @file
-# Azure Pipeline build file for a build using Windows and Visual Studio.
+# Azure Pipeline build file for a build using Windows and the latest Visual Studio toolchain supported.
+#
+# IMPORTANT: This file requires the local repo to contain a .azurepipelines/Matrix-Build-Job.yml file that
+#            performs the actual build steps for the configurations and packages supported by the repo.
 #
 # NOTE: This file is automatically synchronized from Mu DevOps. Update the original file there
 #       instead of the file in this repo.
@@ -11,28 +14,35 @@
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
 
-resources:
-  repositories:
-    - repository: mu_devops
-      type: github
-      endpoint: microsoft
-      name: microsoft/mu_devops
-      ref: refs/tags/v2.3.0
-
 variables:
 - group: architectures-x86-64
 - group: tool-chain-windows-visual-studio-latest
 
-jobs:
-- template: Jobs/PrGate.yml@mu_devops
+extends:
+  template: MuDevOpsWrapper.yml
   parameters:
-    arch_list: $(arch_list)
     do_ci_build: true
-    do_ci_setup: false
+    do_ci_setup: true
     do_non_ci_build: false
     do_non_ci_setup: true
     do_pr_eval: true
-    packages: QemuQ35Pkg
-    target_list: NO-TARGET
-    tool_chain_tag: $(tool_chain_tag)
-    vm_image: $(vm_image)
+    os_type: Windows_NT
+    build_matrix:
+      TARGET_QEMU:
+        Pkgs: 'QemuPkg'
+        Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
+        ArchList: IA32,X64,AARCH64
+      TARGET_Q35:
+        Pkgs: 'QemuQ35Pkg'
+        Targets: 'NO-TARGET'
+        ArchList: IA32,X64
+      TARGET_QEMU_ARM:
+        Pkgs: 'QemuPkg'
+        Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
+        ArchList: IA32,X64,AARCH64
+        SelfHostAgent: true
+      TARGET_Q35_ARM:
+        Pkgs: 'QemuQ35Pkg'
+        Targets: 'NO-TARGET'
+        ArchList: IA32,X64
+        SelfHostAgent: true
