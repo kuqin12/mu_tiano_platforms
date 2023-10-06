@@ -15,6 +15,7 @@ from os import PathLike
 from pathlib import Path
 
 from edk2toolext.environment.plugintypes.uefi_helper_plugin import IUefiHelperPlugin
+from edk2toolext.environment import shell_environment
 from edk2toollib.utility_functions import RunCmd
 from html import unescape
 
@@ -165,9 +166,14 @@ class LinuxVirtualDrive(VirtualDrive):
             raise RuntimeError(e)
         
         # Create an mtools config file to virtually map the image to a drive letter
+        conf_path = os.path.join(os.path.dirname(self.drive_path), "mtool.conf")
+        if os.path.exists(conf_path):
+            # This should be repopulated per build
+            RunCmd("rm", conf_path)
         RunCmd("echo", "mtools_skip_check=1 > ~/.mtoolsrc")
-        RunCmd("echo", f"drive {self.drive_letter}: >> ~/.mtoolsrc")
-        RunCmd("echo", f"\"  file=\\\"{self.drive_path}\\\" exclusive\" >> ~/.mtoolsrc")
+        RunCmd("echo", f"drive+ {self.drive_letter}: >> {conf_path}")
+        RunCmd("echo", f"\"  file=\\\"{self.drive_path}\\\" exclusive\" >> {conf_path}")
+        shell_environment.GetEnvironment().set_shell_var ("MTOOLSRC", conf_path)
 
     def add_file(self, filepath: PathLike):
         """Adds a file to the virtual drive."""
@@ -442,9 +448,9 @@ class VirtualDriveManager(IUefiHelperPlugin):
         return failure_count
     
     @staticmethod
-    def generate_paging_audit(drive: VirtualDrive, report_output_dir: Path, version: str, platform: str, arch: str):
+    def generate_paging_audit(drive: VirtualDrive, report_output_dir: Path, version: str, platform: str):
         paging_audit_data_files = ["1G.dat", "2M.dat", "4K.dat", "PDE.dat", "MAT.dat",
-                                   "GuardPage.dat", "MemoryInfoDatabase.dat"]
+                                   "GuardPage.dat", "MemoryInfoDatabase.dat", "PlatformInfo.dat"]
         paging_audit_generator_path = os.path.join("Common", "MU", "UefiTestingPkg", "AuditTests",
                                                    "PagingAudit", "Windows", "PagingReportGenerator.py")
         report_output_dir.mkdir(exist_ok=True)
@@ -454,7 +460,7 @@ class VirtualDriveManager(IUefiHelperPlugin):
         output_debug = os.path.join(report_output_dir, "pagingauditdebug.txt")
         cmd = "python"
         args = f"{paging_audit_generator_path} -i {report_output_dir} -o {output_audit} \
--p {platform} -t DXE --debug -l {output_debug} -a {arch} --PlatformVersion {version}"
+-p {platform} --debug -l {output_debug} --PlatformVersion {version}"
         result = RunCmd(cmd, args)
         if result != 0:
             e = f"[{cmd} {args}] Result: {result}"

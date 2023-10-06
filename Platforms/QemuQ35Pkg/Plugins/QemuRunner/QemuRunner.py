@@ -109,20 +109,28 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
 
             file_extension = Path(path_to_os).suffix.lower().replace('"', '')
 
-            storage_rule = {
-                ".vhd": f" -drive format=raw,index=0,media=disk,file=\"{path_to_os}\"",
-                ".qcow2": f" -hda \"{path_to_os}\""
+            storage_format = {
+                ".vhd": "raw",
+                ".qcow2": "qcow2"
             }.get(file_extension, None)
 
-            if storage_rule is None:
-                raise Exception("Unknown OS storage type: " + path_to_os)
+            if storage_format is None:
+                raise Exception(f"Unknown OS storage type: {path_to_os}")
 
-            args += storage_rule
+            args += f" -drive file=\"{path_to_os}\",format={storage_format},if=none,id=os_nvme"
+            args += " -device nvme,serial=nvme-1,drive=os_nvme"
         else:
             args += " -m 2048"
 
+        cpu_model = env.GetValue("CPU_MODEL")
+        if cpu_model is None:
+            cpu_model = "qemu64"
+
+        logging.log(logging.INFO, "CPU model: " + cpu_model)
+
         #args += " -cpu qemu64,+rdrand,umip,+smep,+popcnt" # most compatible x64 CPU model + RDRAND + UMIP + SMEP +POPCNT support (not included by default)
-        args += " -cpu qemu64,rdrand=on,umip=on,smep=on,pdpe1gb=on,popcnt=on" # most compatible x64 CPU model + RDRAND + UMIP + SMEP + PDPE1GB + POPCNT support (not included by default)
+        cpu_arg = " -cpu " + cpu_model + ",rdrand=on,umip=on,smep=on,pdpe1gb=on,popcnt=on"
+        args += cpu_arg
 
         if env.GetBuildValue ("QEMU_CORE_NUM") is not None:
             args += " -smp " + env.GetBuildValue ("QEMU_CORE_NUM")
@@ -176,7 +184,7 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
             args += " -net none"
             # Mount disk with startup.nsh
             if os.path.isfile(VirtualDrive):
-                args += f" -hdd {VirtualDrive}"
+                args += f" -drive file={VirtualDrive},if=virtio"
             elif os.path.isdir(VirtualDrive):
                 args += f" -drive file=fat:rw:{VirtualDrive},format=raw,media=disk"
             else:

@@ -13,3 +13,6 @@ UefiDbgExt/x64/
 /Conf/
 /**/Include/Generated/**
 /Platforms/**/dump.dat
+
+# Ignore Rust build output
+/target
