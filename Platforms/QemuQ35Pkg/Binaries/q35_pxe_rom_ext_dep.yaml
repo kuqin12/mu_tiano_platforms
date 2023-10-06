@@ -17,7 +17,7 @@
   "type": "web",
   "name": "pxerom",
   "source": "https://github.com/kuqin12/ipxe/raw/test_mp_release/release/8086100e.efirom",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "internal_path": "/",
   "flags": ["set_shell_var", ],
   "var_name": "PXE_ROM_PATH"

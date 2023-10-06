@@ -87,7 +87,7 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
             pxe_file = "Shell.efi"
 
         # Enable e1000 as nic and setup the TFTP server for pxe boot
-        pxe_rom = os.path.join(shell_environment.GetEnvironment().get_shell_var("PXE_ROM_PATH"), "pxerom_0.0.1")
+        pxe_rom = os.path.join(shell_environment.GetEnvironment().get_shell_var("PXE_ROM_PATH"), "pxerom_0.0.2")
         args += f" -netdev user,id=net0,tftp={pxe_path},bootfile={pxe_file} "\
                 f"-device e1000,netdev=net0,romfile={pxe_rom} "\
                 "-object filter-dump,id=f1,netdev=net0,file=dump.dat"
