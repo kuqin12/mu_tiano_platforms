@@ -385,6 +385,7 @@ INF  MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResour
 INF  FatPkg/EnhancedFatDxe/Fat.inf
 INF  MdeModulePkg/Universal/Disk/UdfDxe/UdfDxe.inf
 
+INF  MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
 INF  ShellPkg/DynamicCommand/TftpDynamicCommand/TftpDynamicCommand.inf
 INF  ShellPkg/DynamicCommand/VariablePolicyDynamicCommand/VariablePolicyDynamicCommand.inf
 INF  QemuPkg/LinuxInitrdDynamicShellCommand/LinuxInitrdDynamicShellCommand.inf
@@ -399,7 +400,7 @@ INF  QemuPkg/LinuxInitrdDynamicShellCommand/LinuxInitrdDynamicShellCommand.inf
 !endif
 
 
-  # INF  NetworkPkg/DpcDxe/DpcDxe.inf
+  INF  NetworkPkg/DpcDxe/DpcDxe.inf
   INF  NetworkPkg/SnpDxe/SnpDxe.inf
   # INF  NetworkPkg/MnpDxe/MnpDxe.inf
 

@@ -1211,10 +1211,10 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   # Network Support
   #
 
-  # NetworkPkg/DpcDxe/DpcDxe.inf
+  NetworkPkg/DpcDxe/DpcDxe.inf
 
   NetworkPkg/SnpDxe/SnpDxe.inf
-  # NetworkPkg/MnpDxe/MnpDxe.inf
+  NetworkPkg/MnpDxe/MnpDxe.inf
 
   # NetworkPkg/ArpDxe/ArpDxe.inf
   # NetworkPkg/Dhcp4Dxe/Dhcp4Dxe.inf
@@ -1255,6 +1255,7 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
   MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
   MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
+  MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
 
   ShellPkg/DynamicCommand/TftpDynamicCommand/TftpDynamicCommand.inf {
     <PcdsFixedAtBuild>
