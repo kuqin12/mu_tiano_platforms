@@ -829,17 +829,17 @@ InitializePlatform (
 
     MmSettings.HeapGuardPolicy.Fields.MmPageGuard                    = 1;
     MmSettings.HeapGuardPolicy.Fields.MmPoolGuard                    = 1;
-    DxeSettings.ImageProtectionPolicy.Fields.ProtectImageFromUnknown = 1;
+    DxeSettings.ImageProtectionPolicy.Data = 0;
     // THE /NXCOMPAT DLL flag cannot be set using non MinGW GCC
  #ifdef __GNUC__
     DxeSettings.ImageProtectionPolicy.Fields.BlockImagesWithoutNxFlag = 0;
  #endif
 
-  // BuildGuidDataHob (
-  //   &gDxeMemoryProtectionSettingsGuid,
-  //   &DxeSettings,
-  //   sizeof (DxeSettings)
-  //   );
+  BuildGuidDataHob (
+    &gDxeMemoryProtectionSettingsGuid,
+    &DxeSettings,
+    sizeof (DxeSettings)
+    );
 
     BuildGuidDataHob (
       &gMmMemoryProtectionSettingsGuid,
