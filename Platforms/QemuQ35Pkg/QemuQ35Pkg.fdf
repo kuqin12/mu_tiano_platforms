@@ -353,7 +353,7 @@ INF  MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
 INF  MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
 INF  MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
 INF  MdeModulePkg/Universal/DriverHealthManagerDxe/DriverHealthManagerDxe.inf
-INF  MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
+INF  MsCorePkg/BetterBdsDxe/BdsDxe.inf
 # MU_CHANGE
 #INF  MdeModulePkg/Application/UiApp/UiApp.inf
 INF  QemuQ35Pkg/QemuKernelLoaderFsDxe/QemuKernelLoaderFsDxe.inf

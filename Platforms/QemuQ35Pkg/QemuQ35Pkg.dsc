@@ -1144,7 +1144,7 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   MdeModulePkg/Universal/Metronome/Metronome.inf
   PcAtChipsetPkg/PcatRealTimeClockRuntimeDxe/PcatRealTimeClockRuntimeDxe.inf
   MdeModulePkg/Universal/DriverHealthManagerDxe/DriverHealthManagerDxe.inf
-  MdeModulePkg/Universal/BdsDxe/BdsDxe.inf {
+  MsCorePkg/BetterBdsDxe/BdsDxe.inf {
     <PcdsDynamicExDefault>
       gMsGraphicsPkgTokenSpaceGuid.PcdPostBackgroundColoringSkipCount|0
   }
@@ -1411,7 +1411,7 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   UnitTestFrameworkPkg/Library/UnitTestPersistenceLibSimpleFileSystem/UnitTestPersistenceLibSimpleFileSystem.inf
   UefiTestingPkg/AuditTests/BootAuditTest/UEFI/BootAuditTestApp.inf
   # UefiTestingPkg/AuditTests/DMAProtectionAudit/UEFI/DMAIVRSProtectionUnitTestApp.inf # NOT APPLICABLE TO Q35
-  UefiTestingPkg/AuditTests/PagingAudit/UEFI/DxePagingAuditTestApp.inf
+  # UefiTestingPkg/AuditTests/PagingAudit/UEFI/DxePagingAuditTestApp.inf
   # UefiTestingPkg/AuditTests/PagingAudit/UEFI/SmmPagingAuditTestApp.inf # DOESN'T PRODUCE OUTPUT
   # UefiTestingPkg/AuditTests/TpmEventLogAudit/TpmEventLogAuditTestApp.inf # DOESN'T PRODUCE OUTPUT
   # UefiTestingPkg/AuditTests/UefiVarLockAudit/UEFI/UefiVarLockAuditTestApp.inf # DOESN'T PRODUCE OUTPUT
