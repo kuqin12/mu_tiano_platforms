@@ -31,3 +31,6 @@
 [submodule "Features/MM_SUPV"]
 	path = Features/MM_SUPV
 	url = https://github.com/microsoft/mu_feature_mm_supv.git
+[submodule "Silicon/Intel/STM"]
+	path = Silicon/Intel/STM
+	url = https://github.com/kuqin12/STM.git
