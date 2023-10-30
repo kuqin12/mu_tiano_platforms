@@ -55,7 +55,9 @@ class CommonPlatform():
         "Common/MU_OEM_SAMPLE",
         "Features/DFCI",
         "Features/CONFIG",
-        "Features/MM_SUPV"
+        "Features/MM_SUPV",
+        "Silicon/Intel/STM/Bios",
+        "Silicon/Intel/STM/Stm"
     )
 
     @staticmethod
@@ -125,6 +127,7 @@ class SettingsManager(UpdateSettingsManager, SetupSettingsManager, PrEvalSetting
             RequiredSubmodule("Features/DFCI", True),
             RequiredSubmodule("Features/CONFIG", True),
             RequiredSubmodule("Features/MM_SUPV", True),
+            RequiredSubmodule("Silicon/Intel/STM", False)
         ]
 
     def SetArchitectures(self, list_of_requested_architectures):
