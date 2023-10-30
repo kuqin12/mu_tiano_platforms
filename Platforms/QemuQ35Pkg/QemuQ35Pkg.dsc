@@ -39,6 +39,7 @@
   DEFINE PEI_MM_IPL_ENABLED             = TRUE
   DEFINE GUI_FRONT_PAGE                 = FALSE
   DEFINE TPM_REPLAY_ENABLED             = FALSE
+  DEFINE INTEL_STM_ENABLED              = TRUE
 
   DEFINE NETWORK_HTTP_ENABLE            = TRUE
   DEFINE NETWORK_ALLOW_HTTP_CONNECTIONS = TRUE
@@ -989,6 +990,9 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   MdeModulePkg/Universal/FaultTolerantWritePei/FaultTolerantWritePei.inf
   MdeModulePkg/Universal/Variable/Pei/VariablePei.inf
   QemuQ35Pkg/SmmAccess/SmmAccessPei.inf
+!if $(INTEL_STM_ENABLED) == TRUE
+  StmPlatformSamplePkg/MsegSmramPei/MsegSmramPei.inf
+!endif
   MmSupervisorPkg/Drivers/StandaloneMmHob/StandaloneMmHob.inf
   MmSupervisorPkg/Drivers/MmCommunicationBuffer/MmCommunicationBufferPei.inf
 !if $(PEI_MM_IPL_ENABLED) == TRUE
