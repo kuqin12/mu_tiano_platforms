@@ -277,12 +277,7 @@ INF  PolicyServicePkg/PolicyService/Pei/PolicyPei.inf
 INF  QemuQ35Pkg/ConfigKnobs/ConfigKnobs.inf
 INF  OemPkg/OemConfigPolicyCreatorPei/OemConfigPolicyCreatorPei.inf
 
-# Shared Crypto
-!if $(ENABLE_SHARED_CRYPTO) == TRUE
-  !include CryptoPkg/Driver/Bin/CryptoDriver.BOOTBLOCK.inc.fdf
-!else
-  INF  CryptoPkg/Driver/CryptoPei.inf
-!endif
+!include CryptoPkg/Driver/Bin/CryptoDriver.PEI.inc.fdf
 
 ################################################################################
 
@@ -477,7 +472,14 @@ INF  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableStandaloneMm.inf
 INF  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableSmmRuntimeDxe.inf
 !else
 INF  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
-INF  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
+# TODO: Remove pre-built VariableRuntimeDxe when DxeRuntimeCryptLib is integrated
+#       The pre-built driver has crypto statically linked.
+# INF  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
+FILE DRIVER = CBD2E4D5-7068-4FF5-B462-9822B4AD8D60 {
+  SECTION PE32 = QemuQ35Pkg/Binaries/VariableRuntimeDxe.efi
+  SECTION DXE_DEPEX_EXP = {gEfiPcdProtocolGuid AND gEfiDevicePathUtilitiesProtocolGuid}
+  SECTION UI = "VariableRuntimeDxe"
+}
 !endif
 
 #
@@ -525,17 +527,11 @@ INF  SecurityPkg/Hash2DxeCrypto/Hash2DxeCrypto.inf
 INF  MsCorePkg/HelloWorldRustDxe/HelloWorldRustDxe.inf
 INF  MsCorePkg/AcpiRGRT/AcpiRgrt.inf
 
-#SHARED_CRYPTO Crypto Bin Modules
-!if $(ENABLE_SHARED_CRYPTO) == TRUE
-  !include CryptoPkg/Driver/Bin/CryptoDriver.DXE.inc.fdf
-!else
-  INF  CryptoPkg/Driver/CryptoDxe.inf
-  INF  CryptoPkg/Driver/CryptoSmm.inf
-!endif
+!include CryptoPkg/Driver/Bin/CryptoDriver.DXE.inc.fdf
+!include CryptoPkg/Driver/Bin/CryptoDriver.STANDALONEMM.inc.fdf
 
 !if $(BUILD_UNIT_TESTS) == TRUE
-  INF  UefiTestingPkg/FunctionalSystemTests/SmmPagingProtectionsTest/Smm/SmmPagingProtectionsTestSmm.inf
-  INF  UefiTestingPkg/FunctionalSystemTests/MemoryProtectionTest/Smm/MemoryProtectionTestSmm.inf
+  # INF UefiTestingPkg/FunctionalSystemTests/SmmPagingProtectionsTest/Smm/SmmPagingProtectionsTestStandaloneMm.inf # NOT YET SUPPORTED
 !if $(SMM_ENABLED) == TRUE
   INF  MmSupervisorPkg/Test/MmPagingAuditTest/UEFI/MmPagingAuditApp.inf
 !endif
@@ -577,6 +573,7 @@ FILE FREEFORM = PCD(gZeroTouchPkgTokenSpaceGuid.PcdZeroTouchCertificateFile) {
   INF MfciPkg/MfciDxe/MfciDxe.inf
   INF MsGraphicsPkg/OnScreenKeyboardDxe/OnScreenKeyboardDxe.inf
   INF MsGraphicsPkg/SimpleWindowManagerDxe/SimpleWindowManagerDxe.inf
+  INF AdvLoggerPkg/Application/AdvancedLogDumper/AdvancedLogDumper.inf
 !if $(SMM_ENABLED) == TRUE
   INF MmSupervisorPkg/Drivers/MmSupervisorErrorReport/MmSupervisorErrorReport.inf
 !endif
@@ -739,6 +736,14 @@ FILE FV_IMAGE = 9E21FD93-9C72-4c15-8C4B-E77F1DB2D792 {
     PE32     PE32                    $(INF_OUTPUT)/$(MODULE_NAME).efi
     UI       STRING="$(MODULE_NAME)" Optional
     VERSION  STRING="$(INF_VERSION)" Optional BUILD_NUM=$(BUILD_NUMBER)
+  }
+
+[Rule.Common.MM_STANDALONE.BINARY]
+  FILE MM_STANDALONE = $(NAMED_GUID) {
+    SMM_DEPEX SMM_DEPEX Optional      |.depex
+    PE32      PE32                    |.efi
+    UI        STRING="$(MODULE_NAME)" Optional
+    VERSION   STRING="$(INF_VERSION)" Optional BUILD_NUM=$(BUILD_NUMBER)
   }
 
 [Rule.Common.UEFI_APPLICATION]

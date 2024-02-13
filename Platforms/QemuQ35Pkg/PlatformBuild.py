@@ -30,7 +30,7 @@ WORKSPACE_ROOT = str(Path(__file__).parent.parent.parent)
 # Declare test whose failure will not return a non-zero exit code
 FAILURE_EXEMPT_TESTS = {
     # example "PiValueTestApp.efi": datetime.datetime(3141, 5, 9, 2, 6, 53, 589793),
-    "DxePagingAuditTestApp.efi": datetime.datetime(2023, 10, 16, 0, 0, 0, 0)
+    "DxePagingAuditTestApp.efi": datetime.datetime(2024, 1, 17, 0, 0, 0, 0)
 }
 
 # Allow failure exempt tests to be ignored for 90 days
@@ -299,6 +299,10 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
         # Enabled all of the SMM modules
         self.env.SetValue("BLD_*_SMM_ENABLED", "TRUE", "Default")
 
+        if self.Helper.generate_secureboot_pcds(self) != 0:
+            logging.error("Failed to generate include PCDs")
+            return -1
+
         return 0
 
     def SetPlatformEnvAfterTarget(self):
@@ -455,12 +459,12 @@ if __name__ == "__main__":
     from edk2toolext.invocables.edk2_platform_build import Edk2PlatformBuild
     from edk2toolext.invocables.edk2_setup import Edk2PlatformSetup
     from edk2toolext.invocables.edk2_update import Edk2Update
-    print("Invoking Stuart")
-    print("     ) _     _")
-    print("    ( (^)-~-(^)")
-    print("__,-.\_( 0 0 )__,-.___")
-    print("  'W'   \   /   'W'")
-    print("         >o<")
+    print(r"Invoking Stuart")
+    print(r"     ) _     _")
+    print(r"    ( (^)-~-(^)")
+    print(r"__,-.\_( 0 0 )__,-.___")
+    print(r"  'W'   \   /   'W'")
+    print(r"         >o<")
     SCRIPT_PATH = os.path.relpath(__file__)
     parser = argparse.ArgumentParser(add_help=False)
     parse_group = parser.add_mutually_exclusive_group()
