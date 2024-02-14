@@ -87,6 +87,7 @@
   DxeServicesTableLib         |MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
   UefiHiiServicesLib          |MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
   RegisterFilterLib           |MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
+  StackCheckFailureLib|MdePkg/Library/StackCheckFailureLibNull/StackCheckFailureLibNull.inf
 
   # Math Libraries
   FltUsedLib |MdePkg/Library/FltUsedLib/FltUsedLib.inf
@@ -503,6 +504,7 @@
   ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
   StandaloneMmCoreEntryPoint|StandaloneMmPkg/Library/StandaloneMmCoreEntryPoint/StandaloneMmCoreEntryPoint.inf
   SmmCpuFeaturesLib|QemuQ35Pkg/Library/SmmCpuFeaturesLib/StandaloneMmCpuFeaturesLib.inf
+  # SmmCpuFeaturesLib|SpamPkg/Library/SmmCpuFeaturesLib/StandaloneMmCpuFeaturesLibStm.inf
   SmmCpuPlatformHookLib|QemuQ35Pkg/Library/SmmCpuPlatformHookLibQemu/SmmCpuPlatformHookLibQemu.inf
   CpuExceptionHandlerLib|UefiCpuPkg/Library/CpuExceptionHandlerLib/SmmCpuExceptionHandlerLib.inf
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLibStandaloneMm.inf
@@ -533,6 +535,11 @@
   IoLib|MmSupervisorPkg/Library/BaseIoLibIntrinsicSysCall/BaseIoLibIntrinsic.inf
   SysCallLib|MmSupervisorPkg/Library/SysCallLib/SysCallLib.inf
   CpuLib|MmSupervisorPkg/Library/BaseCpuLibSysCall/BaseCpuLib.inf
+
+[LibraryClasses.common.USER_DEFINED]
+  StmLib|SpamPkg/Library/StmLib/StmLib.inf
+  StmPlatformLib|SpamPkg/Library/StmPlatformLibNull/StmPlatformLibNull.inf
+  SynchronizationLib|SpamPkg/Library/SimpleSynchronizationLib/SimpleSynchronizationLib.inf
 
 #########################################
 # Advanced Logger Libraries
@@ -870,6 +877,11 @@ QemuQ35Pkg/Library/ResetSystemLib/BaseResetSystemLib.inf
 QemuQ35Pkg/Library/ResetSystemLib/DxeResetSystemLib.inf
 QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
 
+[LibraryClasses.common.USER_DEFINED]
+  StmLib|SpamPkg/Library/StmLib/StmLib.inf
+  StmPlatformLib|SpamPkg/Library/StmPlatformLibNull/StmPlatformLibNull.inf
+  SynchronizationLib|SpamPkg/Library/SimpleSynchronizationLib/SimpleSynchronizationLib.inf
+
 [Components.IA32]
   QemuQ35Pkg/ResetVector/ResetVector.inf
 
@@ -927,7 +939,7 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   MdeModulePkg/Universal/Variable/Pei/VariablePei.inf
   QemuQ35Pkg/SmmAccess/SmmAccessPei.inf
 !if $(INTEL_STM_ENABLED) == TRUE
-  StmPlatformSamplePkg/MsegSmramPei/MsegSmramPei.inf
+  SpamPkg/Drivers/MsegSmramPei/MsegSmramPei.inf
 !endif
   MmSupervisorPkg/Drivers/StandaloneMmHob/StandaloneMmHob.inf
   MmSupervisorPkg/Drivers/MmCommunicationBuffer/MmCommunicationBufferPei.inf
@@ -1397,7 +1409,17 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   #
   # SMM_CORE
   #
-  MmSupervisorPkg/Core/MmSupervisorCore.inf
+  MmSupervisorPkg/Core/MmSupervisorCore.inf {
+    <LibraryClasses>
+      BasePeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
+  }
+
+!if $(INTEL_STM_ENABLED) == TRUE
+  SpamPkg/Core/Stm.inf {
+    <LibraryClasses>
+      NULL|MdePkg/Library/StackCheckLib/StackCheckLib.inf
+  }
+!endif
 
   #
   # Privileged drivers (DXE_SMM_DRIVER modules)

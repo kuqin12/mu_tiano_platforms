@@ -23,7 +23,7 @@ from edk2toolext.invocables.edk2_setup import (RequiredSubmodule,
                                                SetupSettingsManager)
 from edk2toolext.invocables.edk2_update import UpdateSettingsManager
 from edk2toolext.invocables.edk2_parse import ParseSettingsManager
-from edk2toollib.utility_functions import GetHostInfo, RunCmd
+from edk2toollib.utility_functions import GetHostInfo, RunCmd, RunPythonScript
 
 WORKSPACE_ROOT = str(Path(__file__).parent.parent.parent)
 
@@ -57,7 +57,6 @@ class CommonPlatform():
         "Features/DFCI",
         "Features/CONFIG",
         "Features/MM_SUPV",
-        "Silicon/Intel/STM/Bios",
         "Silicon/Intel/STM/Stm"
     )
 
@@ -326,6 +325,17 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
         if(ret != 0):
             raise Exception("SupervisorPolicyMaker Failed: Errorcode %d" % ret)
         self.env.SetValue("BLD_*_POLICY_BIN_PATH", output_name, "Set generated secure policy path")
+        return ret
+
+    def PlatformPostBuild(self):
+        # Add a post build step to build spam core bin and assemble the FD files
+        BaseToolsDir = os.environ['BASE_TOOLS_PATH']
+        cmd = os.path.join(BaseToolsDir, "Bin", "Win32", "GenStm")
+        args = "-e --debug 5 %s -o %s" % (
+            os.path.join(self.env.GetValue("BUILD_OUTPUT_BASE"), "X64", "SpamPkg", "Core", "Stm", "DEBUG", "Stm.dll"),
+            os.path.join(self.env.GetValue("BUILD_OUTPUT_BASE"), "X64", "SpamPkg", "Core", "Stm", "DEBUG", "Stm.bin")
+        )
+        ret = RunCmd(cmd, args)
         return ret
 
     # TODO: Validation should be done by parsing the cpu.c file from qemu

@@ -242,7 +242,7 @@ INF  MdeModulePkg/Universal/Variable/Pei/VariablePei.inf
 
 !if $(SMM_ENABLED) == TRUE
 !if $(INTEL_STM_ENABLED) == TRUE
-INF  StmPlatformSamplePkg/MsegSmramPei/MsegSmramPei.inf
+INF  SpamPkg/Drivers/MsegSmramPei/MsegSmramPei.inf
 !endif
 INF  QemuQ35Pkg/SmmAccess/SmmAccessPei.inf
 INF  MmSupervisorPkg/Drivers/StandaloneMmHob/StandaloneMmHob.inf
