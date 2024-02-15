@@ -23,7 +23,7 @@ from edk2toolext.invocables.edk2_setup import (RequiredSubmodule,
                                                SetupSettingsManager)
 from edk2toolext.invocables.edk2_update import UpdateSettingsManager
 from edk2toolext.invocables.edk2_parse import ParseSettingsManager
-from edk2toollib.utility_functions import GetHostInfo, RunCmd, RunPythonScript
+from edk2toollib.utility_functions import GetHostInfo, RunCmd
 
 WORKSPACE_ROOT = str(Path(__file__).parent.parent.parent)
 
@@ -126,7 +126,6 @@ class SettingsManager(UpdateSettingsManager, SetupSettingsManager, PrEvalSetting
             RequiredSubmodule("Features/DFCI", True),
             RequiredSubmodule("Features/CONFIG", True),
             RequiredSubmodule("Features/MM_SUPV", True),
-            RequiredSubmodule("Silicon/Intel/STM", False)
         ]
 
     def SetArchitectures(self, list_of_requested_architectures):
