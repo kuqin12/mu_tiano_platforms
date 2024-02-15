@@ -56,8 +56,7 @@ class CommonPlatform():
         "Common/MU_OEM_SAMPLE",
         "Features/DFCI",
         "Features/CONFIG",
-        "Features/MM_SUPV",
-        "Silicon/Intel/STM/Stm"
+        "Features/MM_SUPV"
     )
 
     @staticmethod
