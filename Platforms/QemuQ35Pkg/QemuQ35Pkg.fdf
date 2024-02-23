@@ -558,6 +558,9 @@ FILE FREEFORM = PCD(gDfciPkgTokenSpaceGuid.PcdDfciTimerFile) {
 FILE FREEFORM = PCD(gZeroTouchPkgTokenSpaceGuid.PcdZeroTouchCertificateFile) {
     SECTION RAW = ZeroTouchPkg/Certs/ZeroTouch/ZtdRecovery.cer
 }
+FILE FREEFORM = gMmSupervisorAuxFileGuid {
+    SECTION RAW = QemuQ35Pkg/output.bin
+}
 
   INF DfciPkg/IdentityAndAuthManager/IdentityAndAuthManagerDxe.inf
   INF DfciPkg/SettingsManager/SettingsManagerDxe.inf

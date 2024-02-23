@@ -1,6 +1,6 @@
 [submodule "MU_BASECORE"]
 	path = MU_BASECORE
-	url = https://github.com/microsoft/mu_basecore.git
+	url = https://windowspartners.visualstudio.com/MSCoreUEFI/_git/mu_basecore
 	branch = release/202302
 [submodule "Common/MU_TIANO"]
 	path = Common/MU_TIANO
@@ -30,4 +30,4 @@
 	url = https://github.com/microsoft/mu_feature_config.git
 [submodule "Features/MM_SUPV"]
 	path = Features/MM_SUPV
-	url = https://github.com/microsoft/mu_feature_mm_supv.git
+	url = https://github.com/kuqin12/mu_feature_mm_supv.git
