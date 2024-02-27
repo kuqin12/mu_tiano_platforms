@@ -1411,7 +1411,7 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   #
   MmSupervisorPkg/Core/MmSupervisorCore.inf {
     <LibraryClasses>
-      BasePeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
+      PeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
   }
 
 !if $(INTEL_STM_ENABLED) == TRUE

@@ -559,7 +559,7 @@ FILE FREEFORM = PCD(gZeroTouchPkgTokenSpaceGuid.PcdZeroTouchCertificateFile) {
     SECTION RAW = ZeroTouchPkg/Certs/ZeroTouch/ZtdRecovery.cer
 }
 FILE FREEFORM = gMmSupervisorAuxFileGuid {
-    SECTION RAW = QemuQ35Pkg/output.bin
+    SECTION RAW = $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/X64/MmSupervisorPkg/Core/MmSupervisorCore/DEBUG/MmSupervisorCore.aux
 }
 
   INF DfciPkg/IdentityAndAuthManager/IdentityAndAuthManagerDxe.inf
