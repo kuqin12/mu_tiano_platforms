@@ -1410,11 +1410,14 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   # SMM_CORE
   #
   MmSupervisorPkg/Core/MmSupervisorCore.inf {
+    <PcdsFeatureFlag>
+      gUefiCpuPkgTokenSpaceGuid.PcdSmmExceptionTestModeSupport|FALSE
     <LibraryClasses>
       PeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
   }
 
 !if $(INTEL_STM_ENABLED) == TRUE
+  SpamPkg/MmiEntrySpam/MmiEntrySpam.inf
   SpamPkg/Core/Stm.inf {
     <LibraryClasses>
       NULL|MdePkg/Library/StackCheckLib/StackCheckLib.inf

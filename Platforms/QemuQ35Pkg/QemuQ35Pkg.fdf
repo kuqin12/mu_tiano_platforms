@@ -561,6 +561,12 @@ FILE FREEFORM = PCD(gZeroTouchPkgTokenSpaceGuid.PcdZeroTouchCertificateFile) {
 FILE FREEFORM = gMmSupervisorAuxFileGuid {
     SECTION RAW = $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/X64/MmSupervisorPkg/Core/MmSupervisorCore/DEBUG/MmSupervisorCore.aux
 }
+FILE FREEFORM = gMmiEntrySpamFileGuid {
+  SECTION RAW = $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/X64/SpamPkg/MmiEntrySpam/MmiEntrySpam/OUTPUT/MmiEntrySpam.bin
+}
+FILE FREEFORM = gSpamBinFileGuid {
+  SECTION RAW = $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/X64/SpamPkg/Core/Stm/DEBUG/Stm.bin
+}
 
   INF DfciPkg/IdentityAndAuthManager/IdentityAndAuthManagerDxe.inf
   INF DfciPkg/SettingsManager/SettingsManagerDxe.inf
