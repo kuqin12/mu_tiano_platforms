@@ -116,6 +116,8 @@
   gEfiMdePkgTokenSpaceGuid.PcdConfidentialComputingGuestAttr
   gUefiCpuPkgTokenSpaceGuid.PcdGhcbHypervisorFeatures
 
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpmBaseAddress            ## CONSUMES
+
 [FixedPcd]
   gUefiQemuQ35PkgTokenSpaceGuid.PcdOvmfCpuidBase
   gUefiQemuQ35PkgTokenSpaceGuid.PcdOvmfCpuidSize

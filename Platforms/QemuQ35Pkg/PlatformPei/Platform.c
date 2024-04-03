@@ -256,6 +256,7 @@ MemMapInitialization (
       PcdGet32 (PcdOvmfFirmwareFdSize)
       ));
     AddIoMemoryBaseSizeHob (PcdGet32 (PcdOvmfFdBaseAddress), PcdGet32 (PcdOvmfFirmwareFdSize));
+    AddIoMemoryBaseSizeHob (PcdGet64 (PcdTpmBaseAddress), SIZE_64KB);
   }
 
   //
