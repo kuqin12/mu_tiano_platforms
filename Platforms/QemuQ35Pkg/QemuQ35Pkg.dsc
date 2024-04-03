@@ -31,7 +31,7 @@
   #
   DEFINE SOURCE_DEBUG_ENABLE            = FALSE
 !ifndef TPM_ENABLE
-  DEFINE TPM_ENABLE                     = FALSE
+  DEFINE TPM_ENABLE                     = TRUE
 !endif
   DEFINE TPM_CONFIG_ENABLE              = FALSE
   DEFINE OPT_INTO_MFCI_PRE_PRODUCTION   = TRUE
@@ -1414,6 +1414,8 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
       gUefiCpuPkgTokenSpaceGuid.PcdSmmExceptionTestModeSupport|FALSE
     <LibraryClasses>
       PeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
+      HashLib|SpamPkg/Library/HashLibTpm2Raw/HashLibTpm2Raw.inf
+      Tpm2DeviceLib|SecurityPkg/Library/Tpm2DeviceLibDTpm/Tpm2DeviceLibDTpmStandaloneMm.inf
   }
 
 !if $(INTEL_STM_ENABLED) == TRUE
@@ -1421,6 +1423,9 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   SpamPkg/Core/Stm.inf {
     <LibraryClasses>
       NULL|MdePkg/Library/StackCheckLib/StackCheckLib.inf
+      HashLib|SpamPkg/Library/HashLibTpm2Raw/HashLibTpm2Raw.inf
+      PeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
+      MemoryAllocationLib|MdeModulePkg/Library/BaseMemoryAllocationLibNull/BaseMemoryAllocationLibNull.inf
   }
 !endif
 
