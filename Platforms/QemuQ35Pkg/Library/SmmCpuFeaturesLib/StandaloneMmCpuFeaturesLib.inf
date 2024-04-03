@@ -17,6 +17,7 @@
   VERSION_STRING                 = 1.0
   PI_SPECIFICATION_VERSION       = 0x00010032
   LIBRARY_CLASS                  = SmmCpuFeaturesLib
+  CONSTRUCTOR                    = MmCpuFeaturesLibConstructor
 
 [Sources]
   MmCpuFeaturesLib.c
@@ -27,6 +28,12 @@
   QemuPkg/QemuPkg.dec
   QemuQ35Pkg/QemuQ35Pkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
+  StandaloneMmPkg/StandaloneMmPkg.dec
+  SpamPkg/SpamPkg.dec
+  MmSupervisorPkg/MmSupervisorPkg.dec
+
+[Guids]
+  gMmiEntrySpamFileGuid
 
 [LibraryClasses]
   BaseLib

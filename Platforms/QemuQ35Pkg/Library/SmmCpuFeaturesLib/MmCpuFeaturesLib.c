@@ -21,6 +21,54 @@
 #include <Register/Intel/SmramSaveStateMap.h>
 #include <Register/QemuSmramSaveStateMap.h>
 
+#include <Library/FvLib.h>
+#include <Library/HobLib.h>
+#include <SpamResponder.h>
+#include <SmmSecurePolicy.h>
+
+//
+// MMI Entry Base and Length in FV
+//
+EFI_PHYSICAL_ADDRESS  mMmiEntryBaseAddress  = 0;
+UINTN                 mMmiEntrySize         = 0;
+
+//
+// Global variables and symbols pulled in from MmSupervisor
+//
+extern BOOLEAN mCetSupported;
+extern BOOLEAN gPatchXdSupported;
+extern BOOLEAN gPatchMsrIa32MiscEnableSupported;
+extern BOOLEAN m5LevelPagingNeeded;
+
+extern UINT32 mCetPl0Ssp;
+extern UINT32 mCetInterruptSsp;
+extern UINT32 mCetInterruptSspTable;
+
+extern SMM_SUPV_SECURE_POLICY_DATA_V1_0   *FirmwarePolicy;
+
+//
+// Variables used by SMI Handler
+//
+IA32_DESCRIPTOR  gStmSmiHandlerIdtr;
+
+VOID
+EFIAPI
+CpuSmmDebugEntry (
+  IN UINTN  CpuIndex
+  );
+
+VOID
+EFIAPI
+CpuSmmDebugExit (
+  IN UINTN  CpuIndex
+  );
+
+VOID
+EFIAPI
+SmiRendezvous (
+  IN      UINTN  CpuIndex
+  );
+
 //
 // EFER register LMA bit
 //
@@ -37,15 +85,101 @@
 **/
 EFI_STATUS
 EFIAPI
-SmmCpuFeaturesLibConstructor (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+MmCpuFeaturesLibConstructor (
+  IN EFI_HANDLE           ImageHandle,
+  IN EFI_MM_SYSTEM_TABLE  *SystemTable
   )
 {
-  //
-  // No need to program SMRRs on our virtual platform.
-  //
-  return EFI_SUCCESS;
+  UINT16                          ExtHeaderOffset;
+  EFI_FIRMWARE_VOLUME_HEADER      *FwVolHeader;
+  EFI_FIRMWARE_VOLUME_EXT_HEADER  *ExtHeader;
+  EFI_FFS_FILE_HEADER             *FileHeader;
+  EFI_PEI_HOB_POINTERS            Hob;
+  EFI_STATUS                      Status;
+  BOOLEAN                         MmiEntryFound = FALSE;
+  VOID                            *RawMmiEntryFileData;
+
+  Hob.Raw = GetHobList ();
+  if (Hob.Raw == NULL) {
+    Status = EFI_NOT_FOUND;
+    goto Done;
+  }
+
+  do {
+    Hob.Raw = GetNextHob (EFI_HOB_TYPE_FV, Hob.Raw);
+    if (Hob.Raw != NULL) {
+      FwVolHeader = (EFI_FIRMWARE_VOLUME_HEADER *)(UINTN)(Hob.FirmwareVolume->BaseAddress);
+
+      DEBUG ((
+        DEBUG_INFO,
+        "[%a] Found FV HOB referencing FV at 0x%x. Size is 0x%x.\n",
+        __FUNCTION__,
+        (UINTN)FwVolHeader,
+        FwVolHeader->FvLength
+        ));
+
+      ExtHeaderOffset = ReadUnaligned16 (&FwVolHeader->ExtHeaderOffset);
+      if (ExtHeaderOffset != 0) {
+        ExtHeader = (EFI_FIRMWARE_VOLUME_EXT_HEADER *)((UINT8 *)FwVolHeader + ExtHeaderOffset);
+        DEBUG ((DEBUG_INFO, "[%a]   FV GUID = {%g}.\n", __FUNCTION__, &ExtHeader->FvName));
+      }
+
+      //
+      // If a MM_STANDALONE or MM_CORE_STANDALONE driver is in the FV. Add the drivers
+      // to the dispatch list. Mark the FV with this driver as the Standalone BFV.
+      //
+      FileHeader = NULL;
+      do {
+        Status     =  FfsFindNextFile (
+                        EFI_FV_FILETYPE_FREEFORM,
+                        FwVolHeader,
+                        &FileHeader
+                        );
+        if (!EFI_ERROR (Status)) {
+          if (CompareGuid (&FileHeader->Name, &gMmiEntrySpamFileGuid)) {
+            if (MmiEntryFound) {
+              Status = EFI_ALREADY_STARTED;
+              break;
+            }
+            Status = FfsFindSectionData (EFI_SECTION_RAW, FileHeader, &RawMmiEntryFileData, &mMmiEntrySize);
+            if (!EFI_ERROR (Status)) {
+              mMmiEntryBaseAddress  = (EFI_PHYSICAL_ADDRESS)(UINTN)RawMmiEntryFileData;
+            } else {
+              DEBUG ((DEBUG_ERROR, "[%a]   Failed to load MmiEntry [%g] in FV at 0x%p of %x bytes - %r.\n", __FUNCTION__, &gMmiEntrySpamFileGuid, FileHeader, FileHeader->Size, Status));
+              break;
+            }
+
+            DEBUG ((
+              DEBUG_INFO,
+              "[%a]   Discovered MMI Entry for SPAM [%g] in FV at 0x%p of %x bytes.\n",
+              __FUNCTION__,
+              &gMmiEntrySpamFileGuid,
+              mMmiEntryBaseAddress,
+              mMmiEntrySize
+              ));
+            MmiEntryFound = TRUE;
+          }
+
+          if (MmiEntryFound) {
+            // Job done, break out of the loop
+            Status = EFI_SUCCESS;
+            break;
+          }
+        }
+      } while (!EFI_ERROR (Status));
+      Hob.Raw = GetNextHob (EFI_HOB_TYPE_FV, GET_NEXT_HOB (Hob));
+    }
+  } while (Hob.Raw != NULL);
+
+  if (!MmiEntryFound) {
+    DEBUG ((DEBUG_ERROR, "[%a]   Required entries for SPAM not found in any FV.\n", __FUNCTION__));
+    Status = EFI_NOT_FOUND;
+  } else {
+    Status = EFI_SUCCESS;
+  }
+
+Done:
+  return Status;
 }
 
 /**
@@ -192,7 +326,7 @@ SmmCpuFeaturesGetSmiHandlerSize (
   VOID
   )
 {
-  return 0;
+  return mMmiEntrySize;
 }
 
 /**
@@ -220,6 +354,8 @@ SmmCpuFeaturesGetSmiHandlerSize (
   @param[in] Cr3        The base address of the page tables to use when an SMI
                         is processed by the CPU specified by CpuIndex.
 **/
+IA32_DESCRIPTOR                *mGdtrPtr;
+extern UINTN  mMaxNumberOfCpus;
 VOID
 EFIAPI
 SmmCpuFeaturesInstallSmiHandler (
@@ -234,6 +370,86 @@ SmmCpuFeaturesInstallSmiHandler (
   IN UINT32  Cr3
   )
 {
+  PER_CORE_MMI_ENTRY_STRUCT_HDR *SmiEntryStructHdrPtr = NULL;
+  UINT32                        SmiEntryStructHdrAddr;
+  UINT32                        WholeStructSize;
+  UINT16                        *FixStructPtr;
+  UINT32                        *Fixup32Ptr;
+  UINT64                        *Fixup64Ptr;
+  UINT8                         *Fixup8Ptr;
+  UINT32                        tSmiStack;
+
+  if (mGdtrPtr == NULL) {
+    mGdtrPtr = AllocateZeroPool (sizeof (IA32_DESCRIPTOR) * mMaxNumberOfCpus);
+    if (mGdtrPtr == NULL) {
+      DEBUG ((DEBUG_ERROR, "mGdtrPtr == NULL\n"));
+      return;
+    }
+  }
+
+  //
+  // Initialize values in template before copy
+  //
+  tSmiStack                = (UINT32)((UINTN)SmiStack + StackSize - sizeof (UINTN));
+  if ((gStmSmiHandlerIdtr.Base == 0) && (gStmSmiHandlerIdtr.Limit == 0)) {
+    gStmSmiHandlerIdtr.Base  = IdtBase;
+    gStmSmiHandlerIdtr.Limit = (UINT16)(IdtSize - 1);
+  } else {
+    ASSERT (gStmSmiHandlerIdtr.Base == IdtBase);
+    ASSERT (gStmSmiHandlerIdtr.Limit == (UINT16)(IdtSize - 1));
+  }
+
+  //
+  // Set the value at the top of the CPU stack to the CPU Index
+  //
+  *(UINTN *)(UINTN)tSmiStack = CpuIndex;
+
+  //
+  // Copy template to CPU specific SMI handler location from what is located from the FV
+  //
+  CopyMem (
+    (VOID *)((UINTN)SmBase + SMM_HANDLER_OFFSET),
+    (VOID *)mMmiEntryBaseAddress,
+    mMmiEntrySize
+    );
+
+  mGdtrPtr[CpuIndex].Limit = (UINT16) GdtSize - 1;
+  mGdtrPtr[CpuIndex].Base = (UINTN) GdtBase;
+
+  // Populate the fix up addresses
+  // Get Whole structure size
+  WholeStructSize = (UINT32)*(EFI_PHYSICAL_ADDRESS *)(UINTN)(SmBase + SMM_HANDLER_OFFSET + mMmiEntrySize - sizeof(UINT32));
+
+  // Get header address
+  SmiEntryStructHdrAddr = (UINT32)(SmBase + SMM_HANDLER_OFFSET + mMmiEntrySize - sizeof(UINT32) - WholeStructSize);
+  SmiEntryStructHdrPtr = (PER_CORE_MMI_ENTRY_STRUCT_HDR *)(UINTN)(SmiEntryStructHdrAddr);
+
+  // Navegiate to the fixup arrays
+  FixStructPtr = (UINT16 *)(UINTN)(SmiEntryStructHdrAddr + SmiEntryStructHdrPtr->FixUpStructOffset);
+  Fixup32Ptr = (UINT32 *)(UINTN)(SmiEntryStructHdrAddr + SmiEntryStructHdrPtr->FixUp32Offset);
+  Fixup64Ptr = (UINT64 *)(UINTN)(SmiEntryStructHdrAddr + SmiEntryStructHdrPtr->FixUp64Offset);
+  Fixup8Ptr = (UINT8 *)(UINTN)(SmiEntryStructHdrAddr + SmiEntryStructHdrPtr->FixUp8Offset);
+
+  //Do the fixup
+  Fixup32Ptr[FIXUP32_mPatchCetPl0Ssp] = mCetPl0Ssp;
+  Fixup32Ptr[FIXUP32_GDTR] = (UINT32)(UINTN) &mGdtrPtr[CpuIndex];
+  Fixup32Ptr[FIXUP32_CR3_OFFSET] = Cr3;
+  Fixup32Ptr[FIXUP32_mPatchCetInterruptSsp] = mCetInterruptSsp;
+  Fixup32Ptr[FIXUP32_mPatchCetInterruptSspTable] = mCetInterruptSspTable;
+  Fixup32Ptr[FIXUP32_STACK_OFFSET_CPL0] = (UINT32)(UINTN)tSmiStack;
+  Fixup32Ptr[FIXUP32_MSR_SMM_BASE] = SmBase;
+
+  Fixup64Ptr[FIXUP64_SMM_DBG_ENTRY] = (UINT64)CpuSmmDebugEntry;
+  Fixup64Ptr[FIXUP64_SMM_DBG_EXIT] = (UINT64)CpuSmmDebugExit;
+  Fixup64Ptr[FIXUP64_SMI_RDZ_ENTRY] = (UINT64)SmiRendezvous;
+  Fixup64Ptr[FIXUP64_XD_SUPPORTED] = (UINT64)&gPatchXdSupported;
+  Fixup64Ptr[FIXUP64_CET_SUPPORTED] = (UINT64)&mCetSupported;
+  Fixup64Ptr[FIXUP64_SMI_HANDLER_IDTR] = (UINT64)&gStmSmiHandlerIdtr;
+
+  Fixup8Ptr[FIXUP8_gPatchXdSupported] = gPatchXdSupported;
+  Fixup8Ptr[FIXUP8_gPatchMsrIa32MiscEnableSupported] = gPatchMsrIa32MiscEnableSupported;
+  Fixup8Ptr[FIXUP8_m5LevelPagingNeeded] = m5LevelPagingNeeded;
+  Fixup8Ptr[FIXUP8_mPatchCetSupported] = mCetSupported;
 }
 
 /**
