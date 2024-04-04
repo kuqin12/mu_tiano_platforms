@@ -4,7 +4,7 @@
 members = [
   "Common/MU/HidPkg/UefiHidDxe",
   "Common/MU/MsCorePkg/HelloWorldRustDxe",
-  "Features/MM_SUPV/SpamPkg/Tools/gen_aux"
+  "Features/MM_SUPV/SpamPkg/Tools/GenSpamArtifacts/gen_aux"
 ]
 
 # Add packages that generate libraries here
