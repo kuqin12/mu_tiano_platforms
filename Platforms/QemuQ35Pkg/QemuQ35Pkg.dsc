@@ -312,6 +312,16 @@
   PrmModuleDiscoveryLib|PrmPkg/Library/DxePrmModuleDiscoveryLib/DxePrmModuleDiscoveryLib.inf
   PrmPeCoffLib|PrmPkg/Library/DxePrmPeCoffLib/DxePrmPeCoffLib.inf
 
+  StackCheckFailureHookLib|MdePkg/Library/StackCheckFailureHookLibNull/StackCheckFailureHookLibNull.inf
+[LibraryClasses.common.PEI_CORE]
+  NULL|MdePkg/Library/StackCheckLibNull/StackCheckLibNull.inf
+
+[LibraryClasses.common.PEIM, LibraryClasses.common.MM_CORE_STANDALONE, LibraryClasses.common.MM_STANDALONE]
+  NULL|MdePkg/Library/StackCheckLib/StackCheckLibStaticInit.inf
+
+[LibraryClasses.common.DXE_CORE, LibraryClasses.common.SMM_CORE, LibraryClasses.common.DXE_SMM_DRIVER, LibraryClasses.common.DXE_DRIVER, LibraryClasses.common.DXE_RUNTIME_DRIVER, LibraryClasses.common.DXE_SAL_DRIVER, LibraryClasses.common.UEFI_DRIVER, LibraryClasses.common.UEFI_APPLICATION]
+  NULL|MdePkg/Library/StackCheckLib/StackCheckLibDynamicInit.inf
+
 #########################################
 # SEC Libraries
 #########################################
@@ -515,6 +525,7 @@
   IhvSmmSaveStateSupervisionLib|MmSupervisorPkg/Library/IhvMmSaveStateSupervisionLib/IhvMmSaveStateSupervisionLib.inf
   MmServicesTableLib|StandaloneMmPkg/Library/StandaloneMmServicesTableLib/StandaloneMmServicesTableLibCore.inf
   MmSaveStateLib|UefiCpuPkg/Library/MmSaveStateLib/AmdMmSaveStateLib.inf
+  SmmCpuSyncLib|MmSupervisorPkg/Library/StandaloneMmCpuSyncLib/StandaloneMmCpuSyncLib.inf
 
 [LibraryClasses.common.MM_STANDALONE]
   TimerLib|QemuQ35Pkg/Library/AcpiTimerLib/DxeAcpiTimerLib.inf
@@ -892,6 +903,7 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   QemuQ35Pkg/Sec/SecMain.inf {
     <LibraryClasses>
       NULL|MdeModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf
+      NULL|MdePkg/Library/StackCheckLibNull/StackCheckLibNull.inf
   }
 
   #########################################
@@ -1243,6 +1255,10 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
     <PcdsFixedAtBuild>
       gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
   }
+  ShellPkg/DynamicCommand/HttpDynamicCommand/HttpDynamicCommand.inf {
+    <PcdsFixedAtBuild>
+      gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
+  }
   ShellPkg/DynamicCommand/VariablePolicyDynamicCommand/VariablePolicyDynamicCommand.inf {
     <PcdsFixedAtBuild>
       gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
@@ -1262,6 +1278,7 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
       NULL|ShellPkg/Library/UefiShellInstall1CommandsLib/UefiShellInstall1CommandsLib.inf
       NULL|ShellPkg/Library/UefiShellNetwork1CommandsLib/UefiShellNetwork1CommandsLib.inf
       NULL|ShellPkg/Library/UefiShellNetwork2CommandsLib/UefiShellNetwork2CommandsLib.inf
+      NULL|ShellPkg/Library/UefiShellAcpiViewCommandLib/UefiShellAcpiViewCommandLib.inf
 
       HandleParsingLib|ShellPkg/Library/UefiHandleParsingLib/UefiHandleParsingLib.inf
       PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
