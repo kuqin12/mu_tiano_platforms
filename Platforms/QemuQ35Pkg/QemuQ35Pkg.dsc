@@ -1440,6 +1440,7 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   SpamPkg/MmiEntrySpam/MmiEntrySpam.inf
   SpamPkg/Core/Stm.inf {
     <LibraryClasses>
+      NULL|MdePkg/Library/StackCheckLib/StackCheckLibStaticInit.inf
       HashLib|SpamPkg/Library/HashLibTpm2Raw/HashLibTpm2Raw.inf
       PeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
       MemoryAllocationLib|MdeModulePkg/Library/BaseMemoryAllocationLibNull/BaseMemoryAllocationLibNull.inf
