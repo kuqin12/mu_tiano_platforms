@@ -306,6 +306,8 @@
   PlatformSmmProtectionsTestLib|UefiTestingPkg/Library/PlatformSmmProtectionsTestLibNull/PlatformSmmProtectionsTestLibNull.inf
   FmpDependencyLib|FmpDevicePkg/Library/FmpDependencyLib/FmpDependencyLib.inf
 
+  SecurePolicyLib|MmSupervisorPkg/Library/SecurePolicyLib/SecurePolicyLib.inf
+
 [LibraryClasses]
   # Platform Runtime Mechanism (PRM) libraries
   PrmContextBufferLib|PrmPkg/Library/DxePrmContextBufferLib/DxePrmContextBufferLib.inf
@@ -1431,10 +1433,13 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
     <PcdsFeatureFlag>
       gUefiCpuPkgTokenSpaceGuid.PcdSmmExceptionTestModeSupport|FALSE
     <LibraryClasses>
+      NULL|SpamPkg/Core/Test/ResponderValidationTestLib.inf
       PeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
       HashLib|SpamPkg/Library/HashLibTpm2Raw/HashLibTpm2Raw.inf
       Tpm2DeviceLib|SecurityPkg/Library/Tpm2DeviceLibDTpm/Tpm2DeviceLibDTpmStandaloneMm.inf
   }
+  MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
+  SpamPkg/Tests/ResponderValidationTest/ResponderValidationTestApp.inf
 
 !if $(INTEL_STM_ENABLED) == TRUE
   SpamPkg/MmiEntrySpam/MmiEntrySpam.inf
