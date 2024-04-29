@@ -1432,6 +1432,8 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   MmSupervisorPkg/Core/MmSupervisorCore.inf {
     <PcdsFeatureFlag>
       gUefiCpuPkgTokenSpaceGuid.PcdSmmExceptionTestModeSupport|FALSE
+    <PcdsFixedAtBuild>
+      gEfiSpamPkgTokenSpaceGuid.PcdSpamMeasurementPcrIndex|0
     <LibraryClasses>
       NULL|SpamPkg/Core/Test/ResponderValidationTestLib.inf
       PeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
