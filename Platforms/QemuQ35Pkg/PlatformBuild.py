@@ -23,7 +23,7 @@ from edk2toolext.invocables.edk2_setup import (RequiredSubmodule,
                                                SetupSettingsManager)
 from edk2toolext.invocables.edk2_update import UpdateSettingsManager
 from edk2toolext.invocables.edk2_parse import ParseSettingsManager
-from edk2toollib.utility_functions import GetHostInfo, RunCmd
+from edk2toollib.utility_functions import RemoveTree, RunCmd
 
 WORKSPACE_ROOT = str(Path(__file__).parent.parent.parent)
 
@@ -278,6 +278,8 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
         self.env.SetValue("BLD_*_MEMORY_PROTECTION", "TRUE", "Default")
         # Include the MFCI test cert by default, override on the commandline with "BLD_*_SHIP_MODE=TRUE" if you want the retail MFCI cert
         self.env.SetValue("BLD_*_SHIP_MODE", "FALSE", "Default")
+        self.env.SetValue("BLD_*_TARGET", "DEBUG", "Default")
+        self.env.SetValue("BLD_*_TOOL_CHAIN_TAG", "VS2022", "Default")
         self.env.SetValue("CONF_AUTOGEN_INCLUDE_PATH", self.edk2path.GetAbsolutePathOnThisSystemFromEdk2RelativePath("QemuQ35Pkg", "Include"), "Platform Defined")
 
         self.env.SetValue('MU_SCHEMA_DIR', self.edk2path.GetAbsolutePathOnThisSystemFromEdk2RelativePath("QemuQ35Pkg", "CfgData"), "Platform Defined")
@@ -325,16 +327,98 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
         self.env.SetValue("BLD_*_POLICY_BIN_PATH", output_name, "Set generated secure policy path")
         return ret
 
-    def PlatformPostBuild(self):
+    def Build(self) -> int:
+
+        build_output = Path(self.env.GetValue("BUILD_OUTPUT_BASE"))
+
+        spam_pkg_dir = build_output / "X64" / "SpamPkg" # / "Core" / "Stm" / "DEBUG"
+
+        logging.info("Building regular modules for QEMU...")
+        shell_environment.CheckpointBuildVars()
+
+        if self.env.GetValue("BUILDMODULE") is not None:
+            return super().Build()
+
+        build_report = str(Path(self.env.GetValue("BUILD_OUTPUT_BASE"), "BUILD_MMI_ENTRY_REPORT.txt"))
+        self.env.GetEntry("BUILDREPORT_FILE").AllowOverride()
+        self.env.SetValue("BUILDREPORT_FILE", build_report, "Set By Command Line Options.")
+
+        self.env.SetValue("BUILDMODULE", "SpamPkg/MmiEntrySpam/MmiEntrySpam.inf", "Single Build Module")
+        ret = super().Build()
+        if ret != 0:
+            return ret
+
+        build_report = str(Path(self.env.GetValue("BUILD_OUTPUT_BASE"), "BUILD_MM_CORE_REPORT.txt"))
+        self.env.GetEntry("BUILDREPORT_FILE").AllowOverride()
+        self.env.SetValue("BUILDREPORT_FILE", build_report, "Set By Command Line Options.")
+
+        self.env.GetEntry("BUILDMODULE").AllowOverride()
+        self.env.SetValue("BUILDMODULE", "MmSupervisorPkg/Core/MmSupervisorCore.inf", "Single Build Module")
+        ret = super().Build()
+        if ret != 0:
+            return ret
+
+        # Generate the spam artifacts for the MmSupervisorCore and co.
+        mmsupv_dir = build_output / "X64" / "MmSupervisorPkg" / "Core" / "MmSupervisorCore" / "DEBUG"
+        aux_cfg = self.edk2path.GetAbsolutePathOnThisSystemFromEdk2RelativePath("QemuQ35Pkg", "aux_config.spam.cfg")
+
+        inc_file_path = str(Path(self.env.GetValue("BUILD_OUTPUT_BASE"), "MmArtifacts.dsc.inc"))
+
+        ret = self.Helper.generate_spam_includes(aux_cfg, mmsupv_dir, spam_pkg_dir, inc_file_path)
+        if ret != 0:
+            return ret
+
+        # Now really build the SPAM core, unit test and disable other components
+        self.env.SetValue("BLD_*_SKIP_MM_BIN_BUILD", "TRUE", "Skip building MM core and entry block")
+
+        build_report = str(Path(self.env.GetValue("BUILD_OUTPUT_BASE"), "BUILD_SEA_CORE_REPORT.txt"))
+        self.env.GetEntry("BUILDREPORT_FILE").AllowOverride()
+        self.env.SetValue("BUILDREPORT_FILE", build_report, "Set By Command Line Options.")
+
+        self.env.GetEntry("BUILDMODULE").AllowOverride()
+        self.env.SetValue("BUILDMODULE", "SpamPkg/Core/Stm.inf", "Single Build Module")
+        ret = super().Build()
+        if ret != 0:
+            return ret
+
         # Add a post build step to build spam core bin and assemble the FD files
         BaseToolsDir = os.environ['BASE_TOOLS_PATH']
         cmd = os.path.join(BaseToolsDir, "Bin", "Win32", "GenStm")
         args = "-e --debug 5 %s -o %s" % (
-            os.path.join(self.env.GetValue("BUILD_OUTPUT_BASE"), "X64", "SpamPkg", "Core", "Stm", "DEBUG", "Stm.dll"),
-            os.path.join(self.env.GetValue("BUILD_OUTPUT_BASE"), "X64", "SpamPkg", "Core", "Stm", "DEBUG", "Stm.bin")
+            os.path.join(spam_pkg_dir, "Core", "Stm", "DEBUG", "Stm.dll"),
+            os.path.join(spam_pkg_dir, "Core", "Stm", "DEBUG", "Stm.bin")
         )
         ret = RunCmd(cmd, args)
-        return ret
+        if ret != 0:
+            return ret
+
+        build_report = str(Path(self.env.GetValue("BUILD_OUTPUT_BASE"), "BUILD_SEA_TEST_REPORT.txt"))
+        self.env.GetEntry("BUILDREPORT_FILE").AllowOverride()
+        self.env.SetValue("BUILDREPORT_FILE", build_report, "Set By Command Line Options.")
+
+        self.env.GetEntry("BUILDMODULE").AllowOverride()
+        self.env.SetValue("BUILDMODULE", "SpamPkg/Tests/ResponderValidationTest/ResponderValidationTestApp.inf", "Single Build Module")
+        ret = super().Build()
+        if ret != 0:
+            return ret
+
+        # Build everything else...
+        build_report = str(Path(self.env.GetValue("BUILD_OUTPUT_BASE"), "BUILD_REPORT.txt"))
+        self.env.GetEntry("BUILDREPORT_FILE").AllowOverride()
+        self.env.SetValue("BUILDREPORT_FILE", build_report, "Set By Command Line Options.")
+
+        self.env.GetEntry("BUILDMODULE").AllowOverride()
+        self.env.SetValue("BUILDMODULE", "", "Clear to build all modules")
+        ret = super().Build()
+        if ret != 0:
+            return ret
+
+        shell_environment.RevertBuildVars()
+
+        return 0
+
+    def PlatformPostBuild(self):
+        return 0
 
     # TODO: Validation should be done by parsing the cpu.c file from qemu
     def __ValidateCpuModelInfo(self):

@@ -458,7 +458,10 @@ INF  QemuQ35Pkg/SmmControl2Dxe/SmmControl2Dxe.inf
   INF  QemuQ35Pkg/SmmAccess/SmmAccess2Dxe.inf
   INF  MmSupervisorPkg/Drivers/StandaloneMmIpl/PiSmmIpl.inf
 !endif
-INF  MmSupervisorPkg/Core/MmSupervisorCore.inf
+FILE MM_CORE_STANDALONE=gMmSupervisorCoreGuid {
+  SECTION PE32=$(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/X64/MmSupervisorCore.efi
+  SECTION UI= "MmSupervisorCore"
+}
 INF  UefiCpuPkg/CpuIo2Smm/CpuIo2StandaloneMm.inf
 INF  MdeModulePkg/Universal/LockBox/SmmLockBox/SmmLockBox.inf
 !endif
@@ -554,12 +557,8 @@ FILE FREEFORM = PCD(gDfciPkgTokenSpaceGuid.PcdDfciTimerFile) {
     SECTION RAW = DfciPkg/Include/Resources/DfciWorking.bmp
 }
 INF MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
-INF SpamPkg/Tests/ResponderValidationTest/ResponderValidationTestApp.inf
 FILE FREEFORM = PCD(gZeroTouchPkgTokenSpaceGuid.PcdZeroTouchCertificateFile) {
     SECTION RAW = ZeroTouchPkg/Certs/ZeroTouch/ZtdRecovery.cer
-}
-FILE FREEFORM = gMmSupervisorAuxFileGuid {
-    SECTION RAW = QemuQ35Pkg/Library/SmmCpuFeaturesLib/aux_config.spam.aux
 }
 FILE FREEFORM = gMmiEntrySpamFileGuid {
   SECTION RAW = $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/X64/SpamPkg/MmiEntrySpam/MmiEntrySpam/OUTPUT/MmiEntrySpam.bin

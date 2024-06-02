@@ -1429,29 +1429,39 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   #
   # SMM_CORE
   #
+!ifndef $(SKIP_MM_BIN_BUILD)
   MmSupervisorPkg/Core/MmSupervisorCore.inf {
     <PcdsFeatureFlag>
       gUefiCpuPkgTokenSpaceGuid.PcdSmmExceptionTestModeSupport|FALSE
-    <PcdsFixedAtBuild>
-      gEfiSpamPkgTokenSpaceGuid.PcdSpamMeasurementPcrIndex|0
+!if $(INTEL_STM_ENABLED) == TRUE
     <LibraryClasses>
       NULL|SpamPkg/Core/Test/ResponderValidationTestLib.inf
       PeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
       HashLib|SpamPkg/Library/HashLibTpm2Raw/HashLibTpm2Raw.inf
       Tpm2DeviceLib|SecurityPkg/Library/Tpm2DeviceLibDTpm/Tpm2DeviceLibDTpmStandaloneMm.inf
+!endif
   }
+!endif
   MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
-  SpamPkg/Tests/ResponderValidationTest/ResponderValidationTestApp.inf
 
 !if $(INTEL_STM_ENABLED) == TRUE
+!ifndef $(SKIP_MM_BIN_BUILD)
   SpamPkg/MmiEntrySpam/MmiEntrySpam.inf
+!else
   SpamPkg/Core/Stm.inf {
     <LibraryClasses>
       NULL|MdePkg/Library/StackCheckLib/StackCheckLibStaticInit.inf
       HashLib|SpamPkg/Library/HashLibTpm2Raw/HashLibTpm2Raw.inf
       PeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
       MemoryAllocationLib|MdeModulePkg/Library/BaseMemoryAllocationLibNull/BaseMemoryAllocationLibNull.inf
+    <PcdsFixedAtBuild>
+      !include $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/MmArtifacts.dsc.inc
   }
+  SpamPkg/Tests/ResponderValidationTest/ResponderValidationTestApp.inf {
+    <PcdsFixedAtBuild>
+      !include $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/MmArtifacts.dsc.inc
+  }
+!endif
 !endif
 
   #
