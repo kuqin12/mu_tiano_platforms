@@ -32,9 +32,6 @@
 EFI_PHYSICAL_ADDRESS  mMmiEntryBaseAddress  = 0;
 UINTN                 mMmiEntrySize         = 0;
 
-EFI_PHYSICAL_ADDRESS  MmSupvAuxFileBase;
-EFI_PHYSICAL_ADDRESS  MmSupvAuxFileSize;
-
 //
 // Global variables and symbols pulled in from MmSupervisor
 //
@@ -100,9 +97,7 @@ MmCpuFeaturesLibConstructor (
   EFI_PEI_HOB_POINTERS            Hob;
   EFI_STATUS                      Status;
   BOOLEAN                         MmiEntryFound = FALSE;
-  BOOLEAN                         AuxFileFound  = FALSE;
   VOID                            *RawMmiEntryFileData;
-  VOID                            *RawAuxFileData;
 
   Hob.Raw = GetHobList ();
   if (Hob.Raw == NULL) {
@@ -163,25 +158,9 @@ MmCpuFeaturesLibConstructor (
               mMmiEntrySize
               ));
             MmiEntryFound = TRUE;
-          } else if (CompareGuid (&FileHeader->Name, &gMmSupervisorAuxFileGuid)) {
-            // Moving the buffer like size field to our local variable
-            Status = FfsFindSectionData (EFI_SECTION_RAW, FileHeader, &RawAuxFileData, &MmSupvAuxFileSize);
-            DEBUG ((DEBUG_INFO, "Find raw data from supv aux file - %r\n", Status));
-            if (EFI_ERROR (Status)) {
-              break;
-            }
-
-            MmSupvAuxFileBase = (EFI_PHYSICAL_ADDRESS)(UINTN)AllocatePages (EFI_SIZE_TO_PAGES (MmSupvAuxFileSize));
-            if (MmSupvAuxFileBase == 0) {
-              Status = EFI_OUT_OF_RESOURCES;
-              break;
-            }
-
-            CopyMem ((VOID *)(UINTN)MmSupvAuxFileBase, (VOID *)(UINTN)RawAuxFileData, MmSupvAuxFileSize);
-            AuxFileFound = TRUE;
           }
 
-          if (MmiEntryFound && AuxFileFound) {
+          if (MmiEntryFound) {
             // Job done, break out of the loop
             Status = EFI_SUCCESS;
             break;
@@ -192,7 +171,7 @@ MmCpuFeaturesLibConstructor (
     }
   } while (Hob.Raw != NULL);
 
-  if (!MmiEntryFound || !AuxFileFound) {
+  if (!MmiEntryFound) {
     DEBUG ((DEBUG_ERROR, "[%a]   Required entries for SPAM not found in any FV.\n", __FUNCTION__));
     Status = EFI_NOT_FOUND;
   } else {
