@@ -483,6 +483,8 @@
   StandaloneMmCoreEntryPoint|ArmPkg/Library/StandaloneMmCoreEntryPoint/StandaloneMmCoreEntryPoint.inf
   PeCoffExtraActionLib|StandaloneMmPkg/Library/StandaloneMmPeCoffExtraActionLib/StandaloneMmPeCoffExtraActionLib.inf
   MmServicesTableLib|StandaloneMmPkg/Library/StandaloneMmServicesTableLib/StandaloneMmServicesTableLibCore.inf
+  #SerialPortLib|Silicon/Arm/MU_TIANO/ArmPlatformPkg/Library/ArmFfaConsoleLib/ArmFfaConsoleLib.inf
+  CacheMaintenanceLib|MdePkg/Library/BaseCacheMaintenanceLibNull/BaseCacheMaintenanceLibNull.inf
 
 [LibraryClasses.common.MM_STANDALONE]
   StandaloneMmDriverEntryPoint|MdePkg/Library/StandaloneMmDriverEntryPoint/StandaloneMmDriverEntryPoint.inf
@@ -596,7 +598,7 @@
 !if $(TARGET) == RELEASE
   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x21
 !else
-  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0xff
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2f
 !endif
 
 [PcdsFixedAtBuild.common]
@@ -1356,13 +1358,21 @@
   StandaloneMmPkg/Core/StandaloneMmCore.inf {
     <PcdsFixedAtBuild>
       gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000000
+      gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0x60040000
+      gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|62500000
   }
 
   ArmPkg/Drivers/StandaloneMmCpu/StandaloneMmCpu.inf {
     <PcdsFixedAtBuild>
       gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000000
+      gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0x60040000
+      gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|62500000
   }
-  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteStandaloneMm.inf
+  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteStandaloneMm.inf {
+    <PcdsFixedAtBuild>
+      gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0x60040000
+      gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|62500000
+  }
   MdeModulePkg/Universal/Variable/RuntimeDxe/VariableStandaloneMm.inf {
     <LibraryClasses>
       DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
@@ -1371,8 +1381,15 @@
       BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
       VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLib.inf
       VariablePolicyHelperLib|MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf
+    <PcdsFixedAtBuild>
+      gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0x60040000
+      gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|62500000
   }
-  QemuSbsaPkg/VirtNorFlashStandaloneMm/VirtNorFlashStandaloneMm.inf
+  QemuSbsaPkg/VirtNorFlashStandaloneMm/VirtNorFlashStandaloneMm.inf {
+    <PcdsFixedAtBuild>
+      gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0x60040000
+      gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|62500000
+  }
 
 ###################################################################################################
 #

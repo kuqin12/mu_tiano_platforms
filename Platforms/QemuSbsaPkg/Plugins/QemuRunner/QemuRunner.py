@@ -137,6 +137,8 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
         else:
             # write messages to stdio
             args += " -serial stdio"
+            args += " -serial file:secure.log"
+            args += " -serial file:secure_mm.log"
 
         # Connect the debug monitor to a telnet localhost port
         monitor_port = env.GetValue("MONITOR_PORT")
