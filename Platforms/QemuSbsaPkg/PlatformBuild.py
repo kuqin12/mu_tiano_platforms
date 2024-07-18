@@ -299,10 +299,10 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
         args += " ARCH=" + self.env.GetValue("TARGET_ARCH").lower()
         args += " DEBUG=" + str(1 if self.env.GetValue("TARGET").lower() == 'debug' else 0)
         args += " ENABLE_SME_FOR_SWD=1 ENABLE_SVE_FOR_SWD=1 ENABLE_SME_FOR_NS=1 ENABLE_SVE_FOR_NS=1" # SPM_MM=1
-        args += " SPD=spmd SPMD_SPM_AT_SEL2=1 SP_LAYOUT_FILE=/workspaces/mu_tiano_platforms_haf/Silicon/Arm/TFA/plat/qemu/qemu_sbsa/sp_layout.json"
+        args += f" SPD=spmd SPMD_SPM_AT_SEL2=1 SP_LAYOUT_FILE={os.path.join(self.env.GetValue("ARM_TFA_PATH") + "plat/qemu/qemu_sbsa/sp_layout.json")}"
         args += " ENABLE_FEAT_HCX=1" # Features used by hypervisor
         # args += " FEATURE_DETECTION=1" # Enforces support for features enabled.
-        args += " BL32=" + '/workspaces/mu_tiano_platforms_haf/hafnium.bin' #os.path.join(op_fv, "BL32_AP_MM.fd")
+        args += f" BL32={os.path.join(self.GetWorkspaceRoot (), "hafnium.bin")}"
         args += " all fip"
         args += " -j $(nproc)"
         ret = RunCmd(cmd, args, workingdir= self.env.GetValue("ARM_TFA_PATH"))
