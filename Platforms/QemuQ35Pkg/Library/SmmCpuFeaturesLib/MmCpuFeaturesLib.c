@@ -23,7 +23,7 @@
 
 #include <Library/FvLib.h>
 #include <Library/HobLib.h>
-#include <SpamResponder.h>
+#include <SeaResponder.h>
 #include <SmmSecurePolicy.h>
 
 //
@@ -136,7 +136,7 @@ MmCpuFeaturesLibConstructor (
                         &FileHeader
                         );
         if (!EFI_ERROR (Status)) {
-          if (CompareGuid (&FileHeader->Name, &gMmiEntrySpamFileGuid)) {
+          if (CompareGuid (&FileHeader->Name, &gMmiEntrySeaFileGuid)) {
             if (MmiEntryFound) {
               Status = EFI_ALREADY_STARTED;
               break;
@@ -145,7 +145,7 @@ MmCpuFeaturesLibConstructor (
             if (!EFI_ERROR (Status)) {
               mMmiEntryBaseAddress  = (EFI_PHYSICAL_ADDRESS)(UINTN)RawMmiEntryFileData;
             } else {
-              DEBUG ((DEBUG_ERROR, "[%a]   Failed to load MmiEntry [%g] in FV at 0x%p of %x bytes - %r.\n", __FUNCTION__, &gMmiEntrySpamFileGuid, FileHeader, FileHeader->Size, Status));
+              DEBUG ((DEBUG_ERROR, "[%a]   Failed to load MmiEntry [%g] in FV at 0x%p of %x bytes - %r.\n", __FUNCTION__, &gMmiEntrySeaFileGuid, FileHeader, FileHeader->Size, Status));
               break;
             }
 
@@ -153,7 +153,7 @@ MmCpuFeaturesLibConstructor (
               DEBUG_INFO,
               "[%a]   Discovered MMI Entry for SPAM [%g] in FV at 0x%p of %x bytes.\n",
               __FUNCTION__,
-              &gMmiEntrySpamFileGuid,
+              &gMmiEntrySeaFileGuid,
               mMmiEntryBaseAddress,
               mMmiEntrySize
               ));

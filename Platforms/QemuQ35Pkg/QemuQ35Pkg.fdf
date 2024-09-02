@@ -242,7 +242,7 @@ INF  MdeModulePkg/Universal/Variable/Pei/VariablePei.inf
 
 !if $(SMM_ENABLED) == TRUE
 !if $(INTEL_STM_ENABLED) == TRUE
-INF  SpamPkg/Drivers/MsegSmramPei/MsegSmramPei.inf
+INF  SeaPkg/Drivers/MsegSmramPei/MsegSmramPei.inf
 !endif
 INF  QemuQ35Pkg/SmmAccess/SmmAccessPei.inf
 INF  MmSupervisorPkg/Drivers/StandaloneMmHob/StandaloneMmHob.inf
@@ -560,11 +560,11 @@ INF MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
 FILE FREEFORM = PCD(gZeroTouchPkgTokenSpaceGuid.PcdZeroTouchCertificateFile) {
     SECTION RAW = ZeroTouchPkg/Certs/ZeroTouch/ZtdRecovery.cer
 }
-FILE FREEFORM = gMmiEntrySpamFileGuid {
-  SECTION RAW = $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/X64/SpamPkg/MmiEntrySpam/MmiEntrySpam/OUTPUT/MmiEntrySpam.bin
+FILE FREEFORM = gMmiEntrySeaFileGuid {
+  SECTION RAW = $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/X64/SeaPkg/MmiEntrySea/MmiEntrySea/OUTPUT/MmiEntrySea.bin
 }
-FILE FREEFORM = gSpamBinFileGuid {
-  SECTION RAW = $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/X64/SpamPkg/Core/Stm/DEBUG/Stm.bin
+FILE FREEFORM = gSeaBinFileGuid {
+  SECTION RAW = $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/X64/SeaPkg/Core/Stm/DEBUG/Stm.bin
 }
 
   INF DfciPkg/IdentityAndAuthManager/IdentityAndAuthManagerDxe.inf

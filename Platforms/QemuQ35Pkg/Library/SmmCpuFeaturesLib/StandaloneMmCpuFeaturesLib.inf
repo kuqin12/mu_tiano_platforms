@@ -29,11 +29,11 @@
   QemuQ35Pkg/QemuQ35Pkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
   StandaloneMmPkg/StandaloneMmPkg.dec
-  SpamPkg/SpamPkg.dec
+  SeaPkg/SeaPkg.dec
   MmSupervisorPkg/MmSupervisorPkg.dec
 
 [Guids]
-  gMmiEntrySpamFileGuid
+  gMmiEntrySeaFileGuid
 
 [LibraryClasses]
   BaseLib

@@ -314,6 +314,7 @@
   PrmModuleDiscoveryLib|PrmPkg/Library/DxePrmModuleDiscoveryLib/DxePrmModuleDiscoveryLib.inf
   PrmPeCoffLib|PrmPkg/Library/DxePrmPeCoffLib/DxePrmPeCoffLib.inf
 
+  ImagePropertiesRecordLib|MdeModulePkg/Library/ImagePropertiesRecordLib/ImagePropertiesRecordLib.inf
   StackCheckFailureHookLib|MdePkg/Library/StackCheckFailureHookLibNull/StackCheckFailureHookLibNull.inf
 [LibraryClasses.common.PEI_CORE]
   NULL|MdePkg/Library/StackCheckLibNull/StackCheckLibNull.inf
@@ -517,7 +518,7 @@
   ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
   StandaloneMmCoreEntryPoint|StandaloneMmPkg/Library/StandaloneMmCoreEntryPoint/StandaloneMmCoreEntryPoint.inf
   SmmCpuFeaturesLib|QemuQ35Pkg/Library/SmmCpuFeaturesLib/StandaloneMmCpuFeaturesLib.inf
-  # SmmCpuFeaturesLib|SpamPkg/Library/SmmCpuFeaturesLib/StandaloneMmCpuFeaturesLibStm.inf
+  # SmmCpuFeaturesLib|SeaPkg/Library/SmmCpuFeaturesLib/StandaloneMmCpuFeaturesLibStm.inf
   SmmCpuPlatformHookLib|QemuQ35Pkg/Library/SmmCpuPlatformHookLibQemu/SmmCpuPlatformHookLibQemu.inf
   CpuExceptionHandlerLib|UefiCpuPkg/Library/CpuExceptionHandlerLib/SmmCpuExceptionHandlerLib.inf
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLibStandaloneMm.inf
@@ -551,9 +552,9 @@
   CpuLib|MmSupervisorPkg/Library/BaseCpuLibSysCall/BaseCpuLib.inf
 
 [LibraryClasses.common.USER_DEFINED]
-  StmLib|SpamPkg/Library/StmLib/StmLib.inf
-  StmPlatformLib|SpamPkg/Library/StmPlatformLibNull/StmPlatformLibNull.inf
-  SynchronizationLib|SpamPkg/Library/SimpleSynchronizationLib/SimpleSynchronizationLib.inf
+  StmLib|SeaPkg/Library/StmLib/StmLib.inf
+  StmPlatformLib|SeaPkg/Library/StmPlatformLibNull/StmPlatformLibNull.inf
+  SynchronizationLib|SeaPkg/Library/SimpleSynchronizationLib/SimpleSynchronizationLib.inf
 
 #########################################
 # Advanced Logger Libraries
@@ -892,9 +893,9 @@ QemuQ35Pkg/Library/ResetSystemLib/DxeResetSystemLib.inf
 QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
 
 [LibraryClasses.common.USER_DEFINED]
-  StmLib|SpamPkg/Library/StmLib/StmLib.inf
-  StmPlatformLib|SpamPkg/Library/StmPlatformLibNull/StmPlatformLibNull.inf
-  SynchronizationLib|SpamPkg/Library/SimpleSynchronizationLib/SimpleSynchronizationLib.inf
+  StmLib|SeaPkg/Library/StmLib/StmLib.inf
+  StmPlatformLib|SeaPkg/Library/StmPlatformLibNull/StmPlatformLibNull.inf
+  SynchronizationLib|SeaPkg/Library/SimpleSynchronizationLib/SimpleSynchronizationLib.inf
 
 [Components.IA32]
   QemuQ35Pkg/ResetVector/ResetVector.inf
@@ -954,7 +955,7 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
   MdeModulePkg/Universal/Variable/Pei/VariablePei.inf
   QemuQ35Pkg/SmmAccess/SmmAccessPei.inf
 !if $(INTEL_STM_ENABLED) == TRUE
-  SpamPkg/Drivers/MsegSmramPei/MsegSmramPei.inf
+  SeaPkg/Drivers/MsegSmramPei/MsegSmramPei.inf
 !endif
   MmSupervisorPkg/Drivers/StandaloneMmHob/StandaloneMmHob.inf
   MmSupervisorPkg/Drivers/MmCommunicationBuffer/MmCommunicationBufferPei.inf
@@ -1435,10 +1436,12 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
       gUefiCpuPkgTokenSpaceGuid.PcdSmmExceptionTestModeSupport|FALSE
 !if $(INTEL_STM_ENABLED) == TRUE
     <LibraryClasses>
-      NULL|SpamPkg/Core/Test/ResponderValidationTestLib.inf
-      PeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
-      HashLib|SpamPkg/Library/HashLibTpm2Raw/HashLibTpm2Raw.inf
-      Tpm2DeviceLib|SecurityPkg/Library/Tpm2DeviceLibDTpm/Tpm2DeviceLibDTpmStandaloneMm.inf
+      NULL|SeaPkg/Core/Test/ResponderValidationTestLib.inf
+      PeCoffLibNegative|SeaPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
+      HashLib|SeaPkg/Library/HashLibTpm2Raw/HashLibTpm2Raw.inf
+      BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+      MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLib.inf
+      IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
 !endif
   }
 !endif
@@ -1446,18 +1449,21 @@ QemuQ35Pkg/Library/ResetSystemLib/StandaloneMmResetSystemLib.inf
 
 !if $(INTEL_STM_ENABLED) == TRUE
 !ifndef $(SKIP_MM_BIN_BUILD)
-  SpamPkg/MmiEntrySpam/MmiEntrySpam.inf
+  SeaPkg/MmiEntrySea/MmiEntrySea.inf
 !else
-  SpamPkg/Core/Stm.inf {
+  SeaPkg/Core/Stm.inf {
     <LibraryClasses>
       NULL|MdePkg/Library/StackCheckLib/StackCheckLibStaticInit.inf
-      HashLib|SpamPkg/Library/HashLibTpm2Raw/HashLibTpm2Raw.inf
-      PeCoffLibNegative|SpamPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
+      HashLib|SeaPkg/Library/HashLibTpm2Raw/HashLibTpm2Raw.inf
+      BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+      MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLib.inf
+      IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+      PeCoffLibNegative|SeaPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
       MemoryAllocationLib|MdeModulePkg/Library/BaseMemoryAllocationLibNull/BaseMemoryAllocationLibNull.inf
     <PcdsFixedAtBuild>
       !include $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/MmArtifacts.dsc.inc
   }
-  SpamPkg/Tests/ResponderValidationTest/ResponderValidationTestApp.inf {
+  SeaPkg/Tests/ResponderValidationTest/ResponderValidationTestApp.inf {
     <PcdsFixedAtBuild>
       !include $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/MmArtifacts.dsc.inc
   }

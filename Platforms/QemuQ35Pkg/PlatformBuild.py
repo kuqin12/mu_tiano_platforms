@@ -302,6 +302,15 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
             logging.error("Failed to generate include PCDs")
             return -1
 
+        inc_file_path = str(Path(self.ws, "Build", "QemuQ35Pkg", "DEBUG_VS2022", "MmArtifacts.dsc.inc"))
+        if not os.path.exists(inc_file_path):
+            # create the folder if it doesn't exist
+            os.makedirs(os.path.dirname(inc_file_path), exist_ok=True)
+
+        with open(inc_file_path, "w") as inc_file:
+            # just need to create the file
+            pass
+
         return 0
 
     def SetPlatformEnvAfterTarget(self):
@@ -325,13 +334,14 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
         if(ret != 0):
             raise Exception("SupervisorPolicyMaker Failed: Errorcode %d" % ret)
         self.env.SetValue("BLD_*_POLICY_BIN_PATH", output_name, "Set generated secure policy path")
+
         return ret
 
     def Build(self) -> int:
 
         build_output = Path(self.env.GetValue("BUILD_OUTPUT_BASE"))
 
-        spam_pkg_dir = build_output / "X64" / "SpamPkg" # / "Core" / "Stm" / "DEBUG"
+        spam_pkg_dir = build_output / "X64" / "SeaPkg" # / "Core" / "Stm" / "DEBUG"
 
         logging.info("Building regular modules for QEMU...")
         shell_environment.CheckpointBuildVars()
@@ -343,7 +353,7 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
         self.env.GetEntry("BUILDREPORT_FILE").AllowOverride()
         self.env.SetValue("BUILDREPORT_FILE", build_report, "Set By Command Line Options.")
 
-        self.env.SetValue("BUILDMODULE", "SpamPkg/MmiEntrySpam/MmiEntrySpam.inf", "Single Build Module")
+        self.env.SetValue("BUILDMODULE", "SeaPkg/MmiEntrySea/MmiEntrySea.inf", "Single Build Module")
         ret = super().Build()
         if ret != 0:
             return ret
@@ -364,7 +374,7 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
 
         inc_file_path = str(Path(self.env.GetValue("BUILD_OUTPUT_BASE"), "MmArtifacts.dsc.inc"))
 
-        ret = self.Helper.generate_spam_includes(aux_cfg, mmsupv_dir, spam_pkg_dir, inc_file_path)
+        ret = self.Helper.generate_sea_includes(aux_cfg, mmsupv_dir, spam_pkg_dir, inc_file_path)
         if ret != 0:
             return ret
 
@@ -376,14 +386,13 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
         self.env.SetValue("BUILDREPORT_FILE", build_report, "Set By Command Line Options.")
 
         self.env.GetEntry("BUILDMODULE").AllowOverride()
-        self.env.SetValue("BUILDMODULE", "SpamPkg/Core/Stm.inf", "Single Build Module")
+        self.env.SetValue("BUILDMODULE", "SeaPkg/Core/Stm.inf", "Single Build Module")
         ret = super().Build()
         if ret != 0:
             return ret
 
         # Add a post build step to build spam core bin and assemble the FD files
-        BaseToolsDir = os.environ['BASE_TOOLS_PATH']
-        cmd = os.path.join(BaseToolsDir, "Bin", "Win32", "GenStm")
+        cmd = "GenStm"
         args = "-e --debug 5 %s -o %s" % (
             os.path.join(spam_pkg_dir, "Core", "Stm", "DEBUG", "Stm.dll"),
             os.path.join(spam_pkg_dir, "Core", "Stm", "DEBUG", "Stm.bin")
@@ -397,7 +406,7 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
         self.env.SetValue("BUILDREPORT_FILE", build_report, "Set By Command Line Options.")
 
         self.env.GetEntry("BUILDMODULE").AllowOverride()
-        self.env.SetValue("BUILDMODULE", "SpamPkg/Tests/ResponderValidationTest/ResponderValidationTestApp.inf", "Single Build Module")
+        self.env.SetValue("BUILDMODULE", "SeaPkg/Tests/ResponderValidationTest/ResponderValidationTestApp.inf", "Single Build Module")
         ret = super().Build()
         if ret != 0:
             return ret
