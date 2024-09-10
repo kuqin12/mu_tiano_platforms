@@ -49,6 +49,7 @@
   gFdtHobGuid
   gDxeMemoryProtectionSettingsGuid # MU_CHANGE
   gMmMemoryProtectionSettingsGuid # MU_CHANGE
+  gEfiSmmSmramMemoryGuid
 
 [LibraryClasses]
   BaseLib
