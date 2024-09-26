@@ -512,6 +512,33 @@ READ_LOCK_STATUS   = TRUE
     }
   }
 
+[FV.FvMainStmm]
+FvNameGuid         = 64074afe-340a-4be6-94ba-91b5b4d0f71e
+BlockSize          = 0x40
+NumBlocks          = 0         # This FV gets compressed so make it just big enough
+FvAlignment        = 16        # FV alignment and FV attributes setting.
+ERASE_POLARITY     = 1
+MEMORY_MAPPED      = TRUE
+STICKY_WRITE       = TRUE
+LOCK_CAP           = TRUE
+LOCK_STATUS        = TRUE
+WRITE_DISABLED_CAP = TRUE
+WRITE_ENABLED_CAP  = TRUE
+WRITE_STATUS       = TRUE
+WRITE_LOCK_CAP     = TRUE
+WRITE_LOCK_STATUS  = TRUE
+READ_DISABLED_CAP  = TRUE
+READ_ENABLED_CAP   = TRUE
+READ_STATUS        = TRUE
+READ_LOCK_CAP      = TRUE
+READ_LOCK_STATUS   = TRUE
+
+  !include $(SHARED_CRYPTO_PATH)/Driver/Bin/CryptoDriver.STANDALONEMM.inc.fdf
+  INF MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteStandaloneMm.inf
+  INF MdeModulePkg/Universal/Variable/RuntimeDxe/VariableStandaloneMm.inf
+  INF QemuSbsaPkg/VirtNorFlashStandaloneMm/VirtNorFlashStandaloneMm.inf
+  INF ArmPkg/Drivers/StandaloneMmCpu/StandaloneMmCpu.inf
+
 [FV.FV_STANDALONE_MM_COMPACT]
 FvAlignment        = 16
 ERASE_POLARITY     = 1
@@ -531,11 +558,12 @@ READ_LOCK_CAP      = TRUE
 READ_LOCK_STATUS   = TRUE
 
   INF StandaloneMmPkg/Core/StandaloneMmCore.inf
-  !include $(SHARED_CRYPTO_PATH)/Driver/Bin/CryptoDriver.STANDALONEMM.inc.fdf
-  INF MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteStandaloneMm.inf
-  INF MdeModulePkg/Universal/Variable/RuntimeDxe/VariableStandaloneMm.inf
-  INF QemuSbsaPkg/VirtNorFlashStandaloneMm/VirtNorFlashStandaloneMm.inf
-  INF ArmPkg/Drivers/StandaloneMmCpu/StandaloneMmCpu.inf
+
+  FILE FV_IMAGE = 498EA570-881D-4D79-AF99-3D8DDF193181 {
+    SECTION GUIDED EE4E5898-3914-4259-9D6E-DC7BD79403CF PROCESSING_REQUIRED = TRUE {
+      SECTION FV_IMAGE = FvMainStmm
+    }
+  }
 
 ################################################################################
 #

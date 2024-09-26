@@ -285,6 +285,7 @@
   ResetSystemLib|MdeModulePkg/Library/DxeResetSystemLib/DxeResetSystemLib.inf
   FlatPageTableLib|UefiTestingPkg/Library/FlatPageTableLib/FlatPageTableLib.inf
   ImagePropertiesRecordLib|MdeModulePkg/Library/ImagePropertiesRecordLib/ImagePropertiesRecordLib.inf
+  ArmTransferListLib|ArmPkg/Library/ArmTransferListLib/ArmTransferListLib.inf
 
   FdtHelperLib|QemuSbsaPkg/Library/FdtHelperLib/FdtHelperLib.inf
   OemMiscLib|QemuSbsaPkg/Library/OemMiscLib/OemMiscLib.inf
@@ -470,7 +471,7 @@
 
 [LibraryClasses.common.MM_CORE_STANDALONE]
   BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
-  ExtractGuidedSectionLib|EmbeddedPkg/Library/PrePiExtractGuidedSectionLib/PrePiExtractGuidedSectionLib.inf
+  ExtractGuidedSectionLib|MdePkg/Library/BaseExtractGuidedSectionLib/BaseExtractGuidedSectionLib.inf
   FvLib|StandaloneMmPkg/Library/FvLib/FvLib.inf
   HobLib|StandaloneMmPkg/Library/StandaloneMmCoreHobLib/StandaloneMmCoreHobLib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
@@ -1361,15 +1362,9 @@
   #
   # Standalone MM modules in secure world
   #
-  StandaloneMmPkg/Core/StandaloneMmCore.inf {
-    <PcdsFixedAtBuild>
-      gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000000
-  }
+  StandaloneMmPkg/Core/StandaloneMmCore.inf
 
-  ArmPkg/Drivers/StandaloneMmCpu/StandaloneMmCpu.inf {
-    <PcdsFixedAtBuild>
-      gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000000
-  }
+  ArmPkg/Drivers/StandaloneMmCpu/StandaloneMmCpu.inf
   MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteStandaloneMm.inf
   MdeModulePkg/Universal/Variable/RuntimeDxe/VariableStandaloneMm.inf {
     <LibraryClasses>
