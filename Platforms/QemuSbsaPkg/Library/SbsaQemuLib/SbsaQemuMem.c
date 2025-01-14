@@ -70,10 +70,20 @@ SbsaQemuLibConstructor (
     MmSettings.HeapGuardPolicy.Fields.MmPageGuard                    = 1;
     MmSettings.HeapGuardPolicy.Fields.MmPoolGuard                    = 1;
     DxeSettings.ImageProtectionPolicy.Fields.ProtectImageFromUnknown = 1;
-    // THE /NXCOMPAT DLL flag cannot be set using non MinGW GCC
- #ifdef __GNUC__
+
+    // ARM64 does not support having page or pool guards set for these memory types
+    DxeSettings.HeapGuardPageType.Fields.EfiACPIMemoryNVS       = 0;
+    DxeSettings.HeapGuardPageType.Fields.EfiReservedMemoryType  = 0;
+    DxeSettings.HeapGuardPageType.Fields.EfiRuntimeServicesCode = 0;
+    DxeSettings.HeapGuardPageType.Fields.EfiRuntimeServicesData = 0;
+    DxeSettings.HeapGuardPoolType.Fields.EfiACPIMemoryNVS       = 0;
+    DxeSettings.HeapGuardPoolType.Fields.EfiReservedMemoryType  = 0;
+    DxeSettings.HeapGuardPoolType.Fields.EfiRuntimeServicesCode = 0;
+    DxeSettings.HeapGuardPoolType.Fields.EfiRuntimeServicesData = 0;
+
+    // THE /NXCOMPAT DLL flag is not set on grub/shim today, so do not block loading
+    // otherwise we cannot boot Linux
     DxeSettings.ImageProtectionPolicy.Fields.BlockImagesWithoutNxFlag = 0;
- #endif
 
     BuildGuidDataHob (
       &gDxeMemoryProtectionSettingsGuid,

@@ -98,6 +98,11 @@ InstallClearCacheCallback (
   );
 
 VOID
+RelocateSmBase (
+  VOID
+  );
+
+VOID
 AmdSevInitialize (
   VOID
   );
@@ -108,8 +113,6 @@ VOID
 SevInitializeRam (
   VOID
   );
-
-extern BOOLEAN  mS3Supported;
 
 extern UINT8  mPhysMemAddressWidth;
 

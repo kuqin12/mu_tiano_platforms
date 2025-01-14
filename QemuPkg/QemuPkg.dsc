@@ -95,7 +95,6 @@
 [LibraryClasses.common.PEIM]
   Tpm12DeviceLib             |SecurityPkg/Library/Tpm12DeviceLibDTpm/Tpm12DeviceLibDTpm.inf
   Tpm2DeviceLib              |SecurityPkg/Library/Tpm2DeviceLibDTpm/Tpm2DeviceLibDTpm.inf
-  SourceDebugEnabledLib      |SourceLevelDebugPkg/Library/SourceDebugEnabled/SourceDebugEnabledLib.inf
 
 [LibraryClasses.ARM, LibraryClasses.AARCH64]
   NULL|MdePkg/Library/CompilerIntrinsicsLib/ArmCompilerIntrinsicsLib.inf
@@ -128,8 +127,6 @@
   QemuPkg/Library/ConfigSystemModeLibQemu/ConfigSystemModeLib.inf
   QemuPkg/Library/DfciDeviceIdSupportLib/DfciDeviceIdSupportLib.inf
   QemuPkg/Library/DfciUiSupportLib/DfciUiSupportLib.inf
-  QemuPkg/Library/LockBoxLib/LockBoxBaseLib.inf
-  QemuPkg/Library/LockBoxLib/LockBoxDxeLib.inf
   QemuPkg/Library/MsBootOptionsLibQemu/MsBootOptionsLib.inf
   QemuPkg/Library/PlatformBmPrintScLib/PlatformBmPrintScLib.inf
   QemuPkg/Library/PlatformSecureLib/PlatformSecureLib.inf

@@ -54,7 +54,7 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
         executable = env.GetValue("QEMU_PATH", None)
         if not executable:
             executable = str(Path(env.GetValue("QEMU_DIR", ''),"qemu-system-aarch64"))
-            
+
         qemu_version = QemuRunner.QueryQemuVersion(executable)
 
         # turn off network
@@ -82,8 +82,9 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
             if storage_format == "iso":
                 args += f" -cdrom \"{path_to_os}\""
             else:
-                args += f" -drive file=\"{path_to_os}\",format={storage_format},if=none,id=os_nvme"
-                args += " -device nvme,serial=nvme-1,drive=os_nvme"
+                args += f" -drive file=\"{path_to_os}\",format={storage_format},if=none,id=os_disk"
+                args += " -device ahci,id=ahci"
+                args += " -device ide-hd,drive=os_disk,bus=ahci.0"
         elif os.path.isfile(VirtualDrive):
             args += f" -drive file={VirtualDrive},if=virtio"
         elif os.path.isdir(VirtualDrive):
@@ -97,7 +98,7 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
             args += " -m 2048"
 
         args += " -machine sbsa-ref" #,accel=(tcg|kvm)"
-        args += " -cpu max"
+        args += " -cpu max,sve=off,sme=off"
         if env.GetBuildValue ("QEMU_CORE_NUM") is not None:
           args += " -smp " + env.GetBuildValue ("QEMU_CORE_NUM")
         args += " -global driver=cfi.pflash01,property=secure,value=on"
@@ -147,7 +148,10 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
         if os.name == 'nt' and qemu_version[0] >= '8':
             import win32console
             std_handle = win32console.GetStdHandle(win32console.STD_INPUT_HANDLE)
-            console_mode = std_handle.GetConsoleMode()
+            try:
+                console_mode = std_handle.GetConsoleMode()
+            except Exception:
+                std_handle = None
 
         # Run QEMU
         ret = utility_functions.RunCmd(executable, args)
@@ -162,7 +166,7 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
             # Tested same FDs on QEMU 6 and 7, not observing the same.
             ret = 0
 
-        if os.name == 'nt' and qemu_version[0] >= '8':
+        if os.name == 'nt' and qemu_version[0] >= '8' and std_handle is not None:
             # Restore the console mode for Windows on QEMU v8+.
             std_handle.SetConsoleMode(console_mode)
         elif os.name != 'nt':

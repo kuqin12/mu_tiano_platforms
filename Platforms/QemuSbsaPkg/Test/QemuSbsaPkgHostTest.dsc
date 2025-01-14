@@ -35,11 +35,11 @@
 
 [LibraryClasses]
   MfciPolicyParsingLib|MfciPkg/Private/Library/MfciPolicyParsingLibNull/MfciPolicyParsingLibNull.inf
-  MfciDeviceIdSupportLib|MfciPkg/Library/MfciDeviceIdSupportLibNull/MfciDeviceIdSupportLibNull.inf
+  MfciDeviceIdSupportLib|MfciPkg/Library/MfciDeviceIdSupportLibSmbios/MfciDeviceIdSupportLibSmbios.inf
   VariablePolicyHelperLib|MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
   UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
-  UefiRuntimeServicesTableLib|MfciPkg/UnitTests/Library/MockUefiRuntimeServicesTableLib/MockUefiRuntimeServicesTableLib.inf
+  UefiRuntimeServicesTableLib|MdePkg/Test/Mock/Library/Cmocka/MockUefiRuntimeServicesTableLib/MockUefiRuntimeServicesTableLib.inf
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
   ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
@@ -86,14 +86,24 @@
   RngLib|MdePkg/Library/BaseRngLibNull/BaseRngLibNull.inf
 
 [Components]
-MfciPkg/MfciDxe/Test/MfciTargetingHostTest.inf
+MfciPkg/MfciDxe/Test/MfciTargetingHostTest.inf {
+  <LibraryClasses>
+    UefiRuntimeServicesTableLib|MfciPkg/UnitTests/Library/MockUefiRuntimeServicesTableLib/MockUefiRuntimeServicesTableLib.inf
+}
 MfciPkg/MfciDxe/Test/MfciVerifyPolicyAndChangeHostTest.inf {
   <LibraryClasses>
     ResetUtilityLib|MfciPkg/UnitTests/Library/MockResetUtilityLib/MockResetUtilityLib.inf
     BaseCryptLib|MfciPkg/UnitTests/Library/MockBaseCryptLib/MockBaseCryptLib.inf
+    UefiRuntimeServicesTableLib|MfciPkg/UnitTests/Library/MockUefiRuntimeServicesTableLib/MockUefiRuntimeServicesTableLib.inf
 }
-MfciPkg/MfciDxe/Test/MfciPublicInterfaceHostTest.inf
-MfciPkg/MfciDxe/Test/MfciMultipleCertsHostTest.inf
+MfciPkg/MfciDxe/Test/MfciPublicInterfaceHostTest.inf {
+  <LibraryClasses>
+    UefiRuntimeServicesTableLib|MfciPkg/UnitTests/Library/MockUefiRuntimeServicesTableLib/MockUefiRuntimeServicesTableLib.inf
+}
+MfciPkg/MfciDxe/Test/MfciMultipleCertsHostTest.inf {
+  <LibraryClasses>
+    UefiRuntimeServicesTableLib|MfciPkg/UnitTests/Library/MockUefiRuntimeServicesTableLib/MockUefiRuntimeServicesTableLib.inf
+}
 MsWheaPkg/MsWheaReport/Test/MsWheaReportCommonHostTest.inf {
   <PcdsFixedAtBuild>
     gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x07
@@ -151,7 +161,7 @@ SetupDataPkg/ConfApp/UnitTest/ConfAppSecureBootUnitTest.inf {
 }
 MdeModulePkg/Universal/Variable/RuntimeDxe/RuntimeDxeUnitTest/VariableRuntimeDxeUnitTest.inf {
   <LibraryClasses>
-    UefiLib|MdePkg/Test/Library/StubUefiLib/StubUefiLib.inf
+    UefiLib|MdePkg/Test/Mock/Library/Stub/StubUefiLib/StubUefiLib.inf
     VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLib.inf
     VariablePolicyHelperLib|MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf
     TpmMeasurementLib|MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
@@ -159,11 +169,10 @@ MdeModulePkg/Universal/Variable/RuntimeDxe/RuntimeDxeUnitTest/VariableRuntimeDxe
     DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
     UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
     DxeServicesTableLib|MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
-    UefiRuntimeServicesTableLib|MdePkg/Test/Library/MockUefiRuntimeServicesTableLib/MockUefiRuntimeServicesTableLib.inf
-    UefiBootServicesTableLib|MdePkg/Test/Library/MockUefiBootServicesTableLib/MockUefiBootServicesTableLib.inf
+    UefiBootServicesTableLib|MdePkg/Test/Mock/Library/Cmocka/MockUefiBootServicesTableLib/MockUefiBootServicesTableLib.inf
     SynchronizationLib|MdePkg/Test/Library/SynchronizationLibHostUnitTest/SynchronizationLibHostUnitTest.inf
     VariableFlashInfoLib|MdeModulePkg/Library/BaseVariableFlashInfoLib/BaseVariableFlashInfoLib.inf
-    HobLib|MdePkg/Test/Library/StubHobLib/StubHobLib.inf
+    HobLib|MdePkg/Test/Mock/Library/Stub/StubHobLib/StubHobLib.inf
 
     VarCheckLib|MdeModulePkg/Library/VarCheckLib/VarCheckLib.inf
     NULL|MdeModulePkg/Library/VarCheckUefiLib/VarCheckUefiLib.inf
@@ -183,7 +192,7 @@ MdeModulePkg/Library/VariablePolicyLib/VariablePolicyUnitTest/VariablePolicyUnit
   <PcdsFixedAtBuild>
     gEfiMdeModulePkgTokenSpaceGuid.PcdAllowVariablePolicyEnforcementDisable|TRUE
 }
-MdeModulePkg/Core/Dxe/UnitTest/MemoryProtectionUnitTestHost.inf {
+MdeModulePkg/Library/ImagePropertiesRecordLib/UnitTest/ImagePropertiesRecordLibUnitTestHost.inf {
   <LibraryClasses>
     HobLib|MdeModulePkg/Library/BaseHobLibNull/BaseHobLibNull.inf
     PeCoffGetEntryPointLib|MdePkg/Library/BasePeCoffGetEntryPointLib/BasePeCoffGetEntryPointLib.inf
@@ -201,8 +210,7 @@ MdeModulePkg/Core/Dxe/UnitTest/MemoryProtectionUnitTestHost.inf {
     DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
     DebugAgentLib|MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
     CpuExceptionHandlerLib|MdeModulePkg/Library/CpuExceptionHandlerLibNull/CpuExceptionHandlerLibNull.inf
-    UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
-    MemoryBinOverrideLib|MdeModulePkg/Library/MemoryBinOverrideLibNull/MemoryBinOverrideLibNull.inf
+    ImagePropertiesRecordLib|MdeModulePkg/Library/ImagePropertiesRecordLib/ImagePropertiesRecordLib.inf
   <PcdsFixedAtBuild>
     gEfiMdeModulePkgTokenSpaceGuid.PcdLoadModuleAtFixAddressEnable|0
     gEfiMdeModulePkgTokenSpaceGuid.PcdLoadFixAddressRuntimeCodePageNumber|0
@@ -229,10 +237,19 @@ SetupDataPkg/Library/ConfigKnobShimLib/ConfigKnobShimPeiLib/GoogleTest/ConfigKno
     PeiServicesLib|MdePkg/Test/Mock/Library/GoogleTest/MockPeiServicesLib/MockPeiServicesLib.inf
 }
 
-NetworkPkg/Dhcp6Dxe/GoogleTest/Dhcp6DxeGoogleTest.inf
-NetworkPkg/Ip6Dxe/GoogleTest/Ip6DxeGoogleTest.inf
+NetworkPkg/Dhcp6Dxe/GoogleTest/Dhcp6DxeGoogleTest.inf {
+  <LibraryClasses>
+    UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
+}
+NetworkPkg/Ip6Dxe/GoogleTest/Ip6DxeGoogleTest.inf {
+  <LibraryClasses>
+    UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
+  <PcdsFixedAtBuild>
+    gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x02
+}
 NetworkPkg/UefiPxeBcDxe/GoogleTest/UefiPxeBcDxeGoogleTest.inf {
   <LibraryClasses>
+    UefiBootServicesTableLib|MdePkg/Test/Mock/Library/GoogleTest/MockUefiBootServicesTableLib/MockUefiBootServicesTableLib.inf
     UefiRuntimeServicesTableLib|MdePkg/Test/Mock/Library/GoogleTest/MockUefiRuntimeServicesTableLib/MockUefiRuntimeServicesTableLib.inf
 }
 

@@ -153,9 +153,6 @@ NumBlocks     = 0xD0
 gUefiQemuQ35PkgTokenSpaceGuid.PcdOvmfSecPageTablesBase|gUefiQemuQ35PkgTokenSpaceGuid.PcdOvmfSecPageTablesSize
 
 0x006000|0x001000
-gQemuPkgTokenSpaceGuid.PcdOvmfLockBoxStorageBase|gQemuPkgTokenSpaceGuid.PcdOvmfLockBoxStorageSize
-
-0x007000|0x001000
 gEfiMdePkgTokenSpaceGuid.PcdGuidedExtractHandlerTableAddress|gUefiQemuQ35PkgTokenSpaceGuid.PcdGuidedExtractHandlerTableSize
 
 0x010000|0x010000
@@ -233,9 +230,9 @@ INF  MdeModulePkg/Core/Pei/PeiMain.inf
 INF  MdeModulePkg/Universal/PCD/Pei/Pcd.inf
 INF  MdeModulePkg/Universal/ReportStatusCodeRouter/Pei/ReportStatusCodeRouterPei.inf
 INF  MdeModulePkg/Universal/StatusCodeHandler/Pei/StatusCodeHandlerPei.inf
+INF  SecurityPkg/RandomNumberGenerator/RngPei/RngPei.inf
 INF  QemuQ35Pkg/PlatformPei/PlatformPei.inf
 INF  MdeModulePkg/Core/DxeIplPeim/DxeIpl.inf
-INF  UefiCpuPkg/Universal/Acpi/S3Resume2Pei/S3Resume2Pei.inf
 
 INF  MdeModulePkg/Universal/FaultTolerantWritePei/FaultTolerantWritePei.inf
 INF  MdeModulePkg/Universal/Variable/Pei/VariablePei.inf
@@ -276,6 +273,8 @@ INF  MdeModulePkg/Universal/Acpi/FirmwarePerformanceDataTablePei/FirmwarePerform
 INF  PolicyServicePkg/PolicyService/Pei/PolicyPei.inf
 INF  QemuQ35Pkg/ConfigKnobs/ConfigKnobs.inf
 INF  OemPkg/OemConfigPolicyCreatorPei/OemConfigPolicyCreatorPei.inf
+
+INF  DebuggerFeaturePkg/DebugConfigPei/DebugConfigPei.inf
 
 !include $(SHARED_CRYPTO_PATH)/Driver/Bin/CryptoDriver.PEI.inc.fdf
 
@@ -349,7 +348,9 @@ INF  MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
 INF  MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
 INF  MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
 INF  MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
+!if $(DEBUGGER_ENABLED) == FALSE
 INF  MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
+!endif
 INF  MdeModulePkg/Universal/DriverHealthManagerDxe/DriverHealthManagerDxe.inf
 INF  MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
 # MU_CHANGE
@@ -372,9 +373,6 @@ INF  MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf
 INF  MdeModulePkg/Universal/MemoryTest/NullMemoryTestDxe/NullMemoryTestDxe.inf
 
 INF  QemuQ35Pkg/SioBusDxe/SioBusDxe.inf
-!if $(SOURCE_DEBUG_ENABLE) == FALSE
-INF  MdeModulePkg/Bus/Pci/PciSioSerialDxe/PciSioSerialDxe.inf
-!endif
 INF  MdeModulePkg/Bus/Isa/Ps2KeyboardDxe/Ps2KeyboardDxe.inf
 
 INF  MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
@@ -382,8 +380,6 @@ INF  QemuQ35Pkg/SmbiosPlatformDxe/SmbiosPlatformDxe.inf
 
 INF  MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
 INF  QemuQ35Pkg/AcpiPlatformDxe/AcpiPlatformDxe.inf
-INF  MdeModulePkg/Universal/Acpi/S3SaveStateDxe/S3SaveStateDxe.inf
-INF  MdeModulePkg/Universal/Acpi/BootScriptExecutorDxe/BootScriptExecutorDxe.inf
 INF  MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
 
 INF  FatPkg/EnhancedFatDxe/Fat.inf
@@ -446,7 +442,6 @@ INF  QemuQ35Pkg/QemuVideoDxe/QemuVideoDxe.inf
 INF  QemuQ35Pkg/QemuRamfbDxe/QemuRamfbDxe.inf
 INF  QemuQ35Pkg/IoMmuDxe/IoMmuDxe.inf
 
-INF  QemuQ35Pkg/CpuS3DataDxe/CpuS3DataDxe.inf
 !if $(SMM_ENABLED) == TRUE
 INF  QemuQ35Pkg/SmmControl2Dxe/SmmControl2Dxe.inf
 !if $(PEI_MM_IPL_ENABLED) == TRUE
@@ -463,7 +458,6 @@ FILE MM_CORE_STANDALONE=gMmSupervisorCoreGuid {
   SECTION UI= "MmSupervisorCore"
 }
 INF  UefiCpuPkg/CpuIo2Smm/CpuIo2StandaloneMm.inf
-INF  MdeModulePkg/Universal/LockBox/SmmLockBox/SmmLockBox.inf
 !endif
 
 #
@@ -546,6 +540,7 @@ INF PrmPkg/PrmConfigDxe/PrmConfigDxe.inf
 INF PrmPkg/Samples/PrmSampleAcpiParameterBufferModule/PrmSampleAcpiParameterBufferModule.inf
 INF PrmPkg/Samples/PrmSampleHardwareAccessModule/PrmSampleHardwareAccessModule.inf
 INF PrmPkg/Samples/PrmSampleContextBufferModule/PrmSampleContextBufferModule.inf
+INF AdvLoggerPkg/AdvLoggerOsConnectorPrm/AdvLoggerOsConnectorPrm.inf
 
 # PRM Module Loader Driver
 INF PrmPkg/PrmLoaderDxe/PrmLoaderDxe.inf

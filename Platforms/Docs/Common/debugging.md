@@ -1,5 +1,34 @@
 
-# Debugging QEMU
+# Debugger QEMU Platforms
+
+This document described different ways to debug on the QEMU platforms.
+
+## Debugging using UEFI debugger
+
+Both Q35 and SBSA are setup to debug debugged using the MU debugger package. for
+more details on using this debugger, see the [FeatureDebuggerPkg Readme](https://github.com/microsoft/mu_feature_debugger/blob/main/DebuggerFeaturePkg/Readme.md).
+
+By default the debugger is enabled to break in on exceptions, but not to break in
+on an initial breakpoint. To enable the initial breakpoint in DXE, you must pass:
+```
+stuart_build -c Platforms\QemuQ35Pkg\PlatformBuild.py BLD_*_DXE_DBG_BRK=TRUE --FlashRom
+```
+
+On Q35 this allows for debugging over a different port then the usual debug output
+because Q35 has a seperate serial port available to it. On SBSA the serial port
+will be shared with the logging output. As a result, on Q35, if `SERIAL_PORT=<PORT>`
+is not passed on the cmdline, a default serial port at 50001 will be created. On SBSA,
+no default port is set because it will prevent output from occuring on stdout, which
+makes even telling if an exception occurred difficult.
+
+Currently this will only enable the DXE debugger. The MM debugger will be added to Q35
+once it support supervised Standalone MM.
+
+When an exception occurs, the debugger will break in and wait for a debugger client to
+connect. This makes Q35 and SBSA very debuggable, because they will break in on
+exceptions always, meaning a reboot is not required.
+
+## Debugging using QEMU GDB Server
 
 QEMU has the ability to expose a GDB port for debugging. This can be leveraged
 several ways. To start enable the GDB server, add the following parameter when
