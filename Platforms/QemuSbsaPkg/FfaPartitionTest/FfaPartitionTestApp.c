@@ -110,7 +110,7 @@ FfaPartitionTestAppEntry (
   UINT32                  Size;
   UINTN                   SriIndex;
   UINTN                   Dummy;
-  DIRECT_MSG_ARGS_EX      DirectMsgArgsEx;
+  DIRECT_MSG_ARGS         DirectMsgArgsEx;
   UINT16                  CurrentMajorVersion;
   UINT16                  CurrentMinorVersion;
 
@@ -235,7 +235,7 @@ FfaPartitionTestAppEntry (
   DirectMsgArgsEx.Arg4 = ((6 << 16) | (0));
   DirectMsgArgsEx.Arg5 = ((7 << 16) | (1));
   DirectMsgArgsEx.Arg6 = ((8 << 16) | (2));
-  Status               = FfaMessageSendDirectReq2 (FfaTestPartInfo.PartitionId, &FfaNotificationServiceGuid, &DirectMsgArgsEx);
+  Status               = ArmFfaLibMsgSendDirectReq2 (FfaTestPartInfo.PartitionId, &FfaNotificationServiceGuid, &DirectMsgArgsEx);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Unable to communicate direct req 2 with FF-A Ffa test SP (%r).\n", Status));
     goto Done;
@@ -259,7 +259,7 @@ FfaPartitionTestAppEntry (
   DirectMsgArgsEx.Arg6 = ((3 << 16) | (2));
   DirectMsgArgsEx.Arg7 = ((4 << 16) | (3));
   DirectMsgArgsEx.Arg8 = ((5 << 16) | (4));
-  Status               = FfaMessageSendDirectReq2 (FfaTestPartInfo.PartitionId, &FfaNotificationServiceGuid, &DirectMsgArgsEx);
+  Status               = ArmFfaLibMsgSendDirectReq2 (FfaTestPartInfo.PartitionId, &FfaNotificationServiceGuid, &DirectMsgArgsEx);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Unable to communicate direct req 2 with FF-A Ffa test SP (%r).\n", Status));
     goto Done;
@@ -279,7 +279,7 @@ FfaPartitionTestAppEntry (
   DirectMsgArgsEx.Arg2 = 0xb610b3a359f64054;
   DirectMsgArgsEx.Arg3 = 0x01;
   DirectMsgArgsEx.Arg4 = ((7 << 16) | (1));
-  Status               = FfaMessageSendDirectReq2 (FfaTestPartInfo.PartitionId, &FfaNotificationServiceGuid, &DirectMsgArgsEx);
+  Status               = ArmFfaLibMsgSendDirectReq2 (FfaTestPartInfo.PartitionId, &FfaNotificationServiceGuid, &DirectMsgArgsEx);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Unable to communicate direct req 2 with FF-A Ffa test SP (%r).\n", Status));
     goto Done;
@@ -295,7 +295,7 @@ FfaPartitionTestAppEntry (
   // Call the TPM Service get_interface_version
   ZeroMem (&DirectMsgArgsEx, sizeof (DirectMsgArgsEx));
   DirectMsgArgsEx.Arg0 = 0x0F000001;
-  Status               = FfaMessageSendDirectReq2 (FfaTestPartInfo.PartitionId, &FfaTpmServiceGuid, &DirectMsgArgsEx);
+  Status               = ArmFfaLibMsgSendDirectReq2 (FfaTestPartInfo.PartitionId, &FfaTpmServiceGuid, &DirectMsgArgsEx);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Unable to communicate direct req 2 with FF-A Ffa test SP (%r).\n", Status));
     goto Done;
@@ -314,7 +314,7 @@ FfaPartitionTestAppEntry (
   DirectMsgArgsEx.Arg1 = 0xba7aff2eb1eac765;
   DirectMsgArgsEx.Arg2 = 0xb710b3a359f64054; // Battery Service
   DirectMsgArgsEx.Arg3 = 0x01;               // ID 1
-  Status               = FfaMessageSendDirectReq2 (FfaTestPartInfo.PartitionId, &FfaTestServiceGuid, &DirectMsgArgsEx);
+  Status               = ArmFfaLibMsgSendDirectReq2 (FfaTestPartInfo.PartitionId, &FfaTestServiceGuid, &DirectMsgArgsEx);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Unable to communicate direct req 2 with FF-A Ffa test SP (%r).\n", Status));
     goto Done;
