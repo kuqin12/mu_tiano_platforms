@@ -153,6 +153,13 @@ SmmInitHandler (
   SemaphoreHook (&mRebased);
 }
 
+typedef struct {
+  UINT64    SmmGdtPtr;                                      // Offset 0x30
+  UINT32    SmmGdtSize;                                     // Offset 0x38
+} PROCESSOR_SMM_DESCRIPTOR_LITE;
+
+#define SMM_PSD_OFFSET  0xfb00
+
 /**
   Relocate SmmBases for each processor.
 
@@ -171,7 +178,7 @@ SmmRelocateBases (
   )
 {
   EFI_STATUS                 Status;
-  UINT8                      BakBuf[BACK_BUF_SIZE];
+  UINT8                      BakBuf[0x100];
   SMRAM_SAVE_STATE_MAP       BakBuf2;
   SMRAM_SAVE_STATE_MAP       *CpuStatePtr;
   UINT8                      *U8Ptr;
@@ -205,6 +212,13 @@ SmmRelocateBases (
   // Load image for relocation
   //
   CopyMem (U8Ptr, gcSmmInitTemplate, gcSmmInitSize);
+
+  PROCESSOR_SMM_DESCRIPTOR_LITE *Psd = (PROCESSOR_SMM_DESCRIPTOR_LITE *)(UINTN)(SMM_DEFAULT_SMBASE + SMM_PSD_OFFSET);
+  Psd->SmmGdtPtr  = (UINT64)(UINTN)gcSmmInitGdtr.Base;
+  Psd->SmmGdtSize = (UINT32)gcSmmInitGdtr.Limit + 1;
+  DEBUG ((DEBUG_INFO, "SmmRelocateBases - Psd: 0x%p\n", Psd));
+  DEBUG ((DEBUG_INFO, "SmmRelocateBases - Psd->SmmGdtPtr: 0x%lx\n", Psd->SmmGdtPtr));
+  DEBUG ((DEBUG_INFO, "SmmRelocateBases - Psd->SmmGdtSize: 0x%x\n", Psd->SmmGdtSize));
 
   //
   // Retrieve the local APIC ID of current processor

@@ -29,6 +29,10 @@ global ASM_PFX(gcSmmInitTemplate)
 %define PROTECT_MODE_CS 0x8
 %define PROTECT_MODE_DS 0x20
 
+%define DSC_OFFSET 0xfb00
+%define DSC_GDTPTR 0x0
+%define DSC_GDTSIZ 0x8
+
     SECTION .data
 
 NullSeg: DQ 0                   ; reserved by architecture
@@ -87,13 +91,25 @@ ASM_PFX(gcSmmInitGdtr):
     DW      GDT_SIZE - 1
     DD      NullSeg
 
-
+    DEFAULT REL
     SECTION .text
 
 global ASM_PFX(SmmStartup)
 
 BITS 16
+ASM_PFX(gcSmmInitTemplate):
 ASM_PFX(SmmStartup):
+    mov     bx, _GdtDesc - ASM_PFX(SmmStartup) + 0x8000
+    mov     ax,[cs:DSC_OFFSET + DSC_GDTSIZ]
+    dec     ax
+    mov     [cs:bx], ax
+    mov     eax, [cs:DSC_OFFSET + DSC_GDTPTR]
+    mov     [cs:bx + 2], eax
+o32 lgdt    [cs:bx]                       ; lgdt fword ptr cs:[bx]
+    mov     ax, PROTECT_MODE_CS
+    mov     [cs:bx-0x2],ax
+    lea     eax, [0x30000 + (@32bit - ASM_PFX(SmmStartup)) + 0x8000]
+    mov     [cs:bx-0x6], eax
     mov     eax, 0x80000001             ; read capability
     cpuid
     mov     ebx, edx                    ; rdmsr will change edx. keep it in ebx.
@@ -102,7 +118,6 @@ ASM_PFX(SmmStartup):
     mov     eax, strict dword 0         ; source operand will be patched
 ASM_PFX(gPatchSmmInitCr3):
     mov     cr3, eax
-o32 lgdt    [cs:ebp + (ASM_PFX(gcSmmInitGdtr) - ASM_PFX(SmmStartup))]
     mov     eax, strict dword 0         ; source operand will be patched
 ASM_PFX(gPatchSmmInitCr4):
     mov     cr4, eax
@@ -114,7 +129,10 @@ ASM_PFX(gPatchSmmInitCr4):
 ASM_PFX(gPatchSmmInitCr0):
     mov     di, PROTECT_MODE_DS
     mov     cr0, eax
-    jmp     PROTECT_MODE_CS : dword @32bit
+    jmp     dword 0x0:0x0
+_GdtDesc:
+    DW 0
+    DD 0
 
 BITS 32
 @32bit:
@@ -128,12 +146,6 @@ ASM_PFX(gPatchSmmInitStack):
     call    ASM_PFX(SmmInitHandler)
     StuffRsb32
     rsm
-
-BITS 16
-ASM_PFX(gcSmmInitTemplate):
-    mov ebp, ASM_PFX(SmmStartup)
-    sub ebp, 0x30000
-    jmp ebp
 
 ASM_PFX(gcSmmInitSize): DW $ - ASM_PFX(gcSmmInitTemplate)
 
