@@ -242,7 +242,6 @@ INF  MdeModulePkg/Universal/Variable/Pei/VariablePei.inf
 INF  SeaPkg/Drivers/MsegSmramPei/MsegSmramPei.inf
 !endif
 INF  QemuQ35Pkg/SmmAccess/SmmAccessPei.inf
-INF  MmSupervisorPkg/Drivers/StandaloneMmHob/StandaloneMmHob.inf
 INF  MmSupervisorPkg/Drivers/MmCommunicationBuffer/MmCommunicationBufferPei.inf
 !endif
 
@@ -444,13 +443,14 @@ INF  QemuQ35Pkg/IoMmuDxe/IoMmuDxe.inf
 
 !if $(SMM_ENABLED) == TRUE
 INF  QemuQ35Pkg/SmmControl2Dxe/SmmControl2Dxe.inf
+INF  QemuQ35Pkg/SmmAccess/SmmAccess2Dxe.inf
 !if $(PEI_MM_IPL_ENABLED) == TRUE
   INF  QemuQ35Pkg/SmmControl2Dxe/MmControlPei.inf
   INF  MmSupervisorPkg/Drivers/MmPeiLaunchers/MmIplPei.inf
   INF  MmSupervisorPkg/Drivers/MmPeiLaunchers/MmIplX64Relay.inf
   INF  MmSupervisorPkg/Drivers/MmPeiLaunchers/MmDxeSupport.inf
+  INF  StandaloneMmPkg/Drivers/MmCommunicationDxe/MmCommunicationDxe.inf
 !else
-  INF  QemuQ35Pkg/SmmAccess/SmmAccess2Dxe.inf
   INF  MmSupervisorPkg/Drivers/StandaloneMmIpl/PiSmmIpl.inf
 !endif
 FILE MM_CORE_STANDALONE=gMmSupervisorCoreGuid {
@@ -498,7 +498,6 @@ INF  MsGraphicsPkg/MsEarlyGraphics/Dxe/MsEarlyGraphics.inf
 INF  MsWheaPkg/MsWheaReport/Dxe/MsWheaReportDxe.inf
 INF  MsWheaPkg/MsWheaReport/Smm/MsWheaReportStandaloneMm.inf
 INF  MdeModulePkg/Universal/ReportStatusCodeRouter/Smm/ReportStatusCodeRouterStandaloneMm.inf
-INF  MsCorePkg/Universal/StatusCodeHandler/Serial/Smm/SerialStatusCodeHandlerSmm.inf
 INF  MdeModulePkg/Universal/Acpi/FirmwarePerformanceDataTableSmm/FirmwarePerformanceStandaloneMm.inf
 INF  MsCorePkg/MuVarPolicyFoundationDxe/MuVarPolicyFoundationDxe.inf
 INF MsCorePkg/LoadOptionVariablePolicyDxe/LoadOptionVariablePolicyDxe.inf
@@ -513,13 +512,7 @@ INF  MmSupervisorPkg/Drivers/MmSupervisorRing3Performance/MmSupervisorRing3Perfo
 # COMMENTED OUT DUE TO LACK OF TPM
 # INF  SecurityPkg/Tcg/MemoryOverwriteControl/TcgMor.inf
 INF  MdeModulePkg/Universal/EsrtFmpDxe/EsrtFmpDxe.inf
-!if $(BUILD_RUST_CODE) == TRUE
-INF  MsCorePkg/HelloWorldRustDxe/HelloWorldRustDxe.inf
-INF  HidPkg/UsbHidDxe/UsbHidDxe.inf
-INF  HidPkg/UefiHidDxe/UefiHidDxe.inf
-!else
 INF  MdeModulePkg/Bus/Usb/UsbMouseAbsolutePointerDxe/UsbMouseAbsolutePointerDxe.inf
-!endif
 INF  DfciPkg/Application/DfciMenu/DfciMenu.inf
 INF  MsGraphicsPkg/PrintScreenLogger/PrintScreenLogger.inf
 INF  SecurityPkg/Hash2DxeCrypto/Hash2DxeCrypto.inf
@@ -784,7 +777,7 @@ FILE FV_IMAGE = 9E21FD93-9C72-4c15-8C4B-E77F1DB2D792 {
     RAW ASL                |.aml
   }
 
-[Rule.Common.SEC.RESET_VECTOR]
+[Rule.Common.USER_DEFINED.RESET_VECTOR]
   FILE RAW = $(NAMED_GUID) {
     RAW BIN   Align = 16   |.bin
   }

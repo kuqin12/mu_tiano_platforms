@@ -21,7 +21,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Get current Qemu version
       id: qemu-version
       run: |
@@ -62,7 +62,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Get current Qemu version
       id: qemu-version
       run: |
@@ -127,19 +127,19 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Get current Qemu version
         id: qemu-version
         run: |
           qemuVersion=$(jq -r .linux $QEMU_VERSION_FILE)
           echo "QEMU_VERSION=$qemuVersion" >> $GITHUB_OUTPUT
       - name: Download Windows Qemu Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: qemu-windows
           path: windows
       - name: Download Linux Qemu Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: qemu-linux
           path: linux

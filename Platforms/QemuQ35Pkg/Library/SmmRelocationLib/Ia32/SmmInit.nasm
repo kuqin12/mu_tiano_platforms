@@ -15,6 +15,7 @@
 %include "StuffRsbNasm.inc"
 
 extern ASM_PFX(SmmInitHandler)
+extern ASM_PFX(ReleaseSmmRelocationSemaphore)
 extern ASM_PFX(mRebasedFlag)
 extern ASM_PFX(mSmmRelocationOriginalAddress)
 
@@ -94,6 +95,10 @@ global ASM_PFX(SmmStartup)
 
 BITS 16
 ASM_PFX(SmmStartup):
+    mov     eax, strict dword 0         ; source operand will be patched
+ASM_PFX(gPatchSmmInitCr0):
+    btr     eax, 31             ; Clear CR0.PG
+    mov     cr0, eax
     mov     eax, 0x80000001             ; read capability
     cpuid
     mov     ebx, edx                    ; rdmsr will change edx. keep it in ebx.
@@ -106,14 +111,11 @@ o32 lgdt    [cs:ebp + (ASM_PFX(gcSmmInitGdtr) - ASM_PFX(SmmStartup))]
     mov     eax, strict dword 0         ; source operand will be patched
 ASM_PFX(gPatchSmmInitCr4):
     mov     cr4, eax
-    mov     ecx, 0xc0000080             ; IA32_EFER MSR
-    rdmsr
-    or      eax, ebx                    ; set NXE bit if NX is available
-    wrmsr
-    mov     eax, strict dword 0         ; source operand will be patched
-ASM_PFX(gPatchSmmInitCr0):
+    ; mov     ecx, 0xc0000080             ; IA32_EFER MSR
+    ; rdmsr
+    ; or      eax, ebx                    ; set NXE bit if NX is available
+    ; wrmsr
     mov     di, PROTECT_MODE_DS
-    mov     cr0, eax
     jmp     PROTECT_MODE_CS : dword @32bit
 
 BITS 32
@@ -125,6 +127,9 @@ BITS 32
     mov     ss, edi
     mov     esp, strict dword 0         ; source operand will be patched
 ASM_PFX(gPatchSmmInitStack):
+    mov     eax, cr0
+    bts     eax, 31
+    mov     cr0, eax
     call    ASM_PFX(SmmInitHandler)
     StuffRsb32
     rsm
@@ -144,7 +149,25 @@ ASM_PFX(SmmRelocationSemaphoreComplete):
     mov     eax, [ASM_PFX(mRebasedFlag)]
     mov     byte [eax], 1
     pop     eax
-    jmp     [ASM_PFX(mSmmRelocationOriginalAddress)]
+    ; save the volatile registers before messing with them...
+    push    eax
+    push    ecx
+    push    edx
+    ; load the contents in ASM_PFX(mSmmRelocationOriginalAddress)
+    mov     eax, [ASM_PFX(mSmmRelocationOriginalAddress)]
+    push    eax
+    add     esp, -0x20
+    ; Release the semaphore to let other CPUs proceed
+    call    ASM_PFX(ReleaseSmmRelocationSemaphore)
+    add     esp, 0x20
+    pop     eax
+    ; restore the volatile registers
+    pop     edx
+    pop     ecx
+    ; here we need to swap the top of stack with eax
+    xchg    eax, [esp]
+    ; this is essentially jmp to eax we pushed earlier and also balances the stack
+    ret
 
 global ASM_PFX(SmmInitFixupAddress)
 ASM_PFX(SmmInitFixupAddress):

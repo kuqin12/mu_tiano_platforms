@@ -28,7 +28,7 @@
   UefiRuntimeServicesTableLib  |MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
   PeiServicesLib               |MdePkg/Library/PeiServicesLib/PeiServicesLib.inf
   HiiLib                       |MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
-  NULL                         |MdePkg/Library/StackCheckLibNull/StackCheckLibNull.inf
+  StackCheckLib                |MdePkg/Library/StackCheckLibNull/StackCheckLibNull.inf
 
   # Services tables/Entry points
   UefiBootServicesTableLib    |MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
@@ -84,7 +84,6 @@
 
   # TPM Libraries
   OemTpm2InitLib          |SecurityPkg/Library/OemTpm2InitLibNull/OemTpm2InitLib.inf
-  Tpm2DebugLib            |SecurityPkg/Library/Tpm2DebugLib/Tpm2DebugLibNull.inf
   Tpm12CommandLib         |SecurityPkg/Library/Tpm12CommandLib/Tpm12CommandLib.inf
   Tpm2CommandLib          |SecurityPkg/Library/Tpm2CommandLib/Tpm2CommandLib.inf
   Tpm2DeviceLib           |SecurityPkg/Library/Tpm2DeviceLibTcg2/Tpm2DeviceLibTcg2.inf
@@ -97,8 +96,7 @@
   Tpm2DeviceLib              |SecurityPkg/Library/Tpm2DeviceLibDTpm/Tpm2DeviceLibDTpm.inf
 
 [LibraryClasses.ARM, LibraryClasses.AARCH64]
-  NULL|MdePkg/Library/CompilerIntrinsicsLib/ArmCompilerIntrinsicsLib.inf
-  NULL|MdePkg/Library/BaseStackCheckLib/BaseStackCheckLib.inf
+  NULL|MdePkg/Library/CompilerIntrinsicsLib/CompilerIntrinsicsLib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsicArmVirt.inf
 
 [LibraryClasses.common.PEIM]

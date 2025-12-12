@@ -30,6 +30,7 @@ WORKSPACE_ROOT = str(Path(__file__).parent.parent.parent)
 # Declare test whose failure will not return a non-zero exit code
 FAILURE_EXEMPT_TESTS = {
     # example "PiValueTestApp.efi": datetime.datetime(3141, 5, 9, 2, 6, 53, 589793),
+    "LineParserTestApp.efi": datetime.datetime(2025, 6, 2, 0, 0, 0, 0)
 }
 
 # Allow failure exempt tests to be ignored for 90 days
@@ -59,16 +60,30 @@ class CommonPlatform():
         "Features/MM_SUPV"
     )
 
+    @classmethod
+    def GetDscName(cls, ArchCsv: str) -> str:
+        ''' return the DSC given the architectures requested.
+
+        ArchCsv: csv string containing all architectures to build
+        '''
+        dsc = "QemuQ35Pkg"
+        if "IA32" in ArchCsv.upper():
+            dsc += "IA32"
+
+        if "X64" in ArchCsv.upper():
+            dsc += "X64"
+
+        dsc += ".dsc"
+        return dsc
+
     @staticmethod
     def add_common_command_line_options(parserObj) -> None:
         """Adds command line options common to settings managers."""
         codeql_helpers.add_command_line_option(parserObj)
-        parserObj.add_argument("-r", "--rust", dest="build_rust", action="store_true", help="Builds this platform with additional Rust components (And some C components removed).")
 
     @staticmethod
     def get_common_command_line_options(settings, args) -> None:
         """Retrieves command line options common to settings managers."""
-        settings.build_rust = args.build_rust
         settings.codeql = CommonPlatform.is_codeql_enabled(args)
 
     @staticmethod
@@ -77,12 +92,10 @@ class CommonPlatform():
         return codeql_helpers.is_codeql_enabled_on_command_line(args)
 
     @staticmethod
-    def get_active_scopes(codeql_enabled: bool, build_rust: bool) -> Tuple[str]:
+    def get_active_scopes(codeql_enabled: bool) -> Tuple[str]:
         """Returns the active scopes for the platform."""
         active_scopes = CommonPlatform.Scopes
         active_scopes += codeql_helpers.get_scopes(codeql_enabled)
-        if build_rust:
-            active_scopes += ("rust-ci",)
 
         if codeql_enabled:
             codeql_filter_files = [str(n) for n in glob.glob(
@@ -128,14 +141,14 @@ class SettingsManager(UpdateSettingsManager, SetupSettingsManager, PrEvalSetting
             If no RequiredSubmodules return an empty iterable
         """
         return [
-            RequiredSubmodule("MU_BASECORE", True),
-            RequiredSubmodule("Common/MU", True),
-            RequiredSubmodule("Common/MU_TIANO", True),
-            RequiredSubmodule("Common/MU_OEM_SAMPLE", True),
-            RequiredSubmodule("Features/DEBUGGER", True),
-            RequiredSubmodule("Features/DFCI", True),
-            RequiredSubmodule("Features/CONFIG", True),
-            RequiredSubmodule("Features/MM_SUPV", True),
+            RequiredSubmodule("MU_BASECORE", False, ".pytool/CISettings.py"),
+            RequiredSubmodule("Common/MU", False, ".pytool/CISettings.py"),
+            RequiredSubmodule("Common/MU_TIANO", False, ".pytool/CISettings.py"),
+            RequiredSubmodule("Common/MU_OEM_SAMPLE", False, ".pytool/CISettings.py"),
+            RequiredSubmodule("Features/DEBUGGER", False, ".pytool/CISettings.py"),
+            RequiredSubmodule("Features/DFCI", False, ".pytool/CISettings.py"),
+            RequiredSubmodule("Features/CONFIG", False, ".pytool/CISettings.py"),
+            RequiredSubmodule("Features/MM_SUPV", False, ".pytool/CISettings.py"),
         ]
 
     def SetArchitectures(self, list_of_requested_architectures):
@@ -159,7 +172,7 @@ class SettingsManager(UpdateSettingsManager, SetupSettingsManager, PrEvalSetting
 
     def GetActiveScopes(self):
         ''' return tuple containing scopes that should be active for this process '''
-        return CommonPlatform.get_active_scopes(self.codeql, self.build_rust)
+        return CommonPlatform.get_active_scopes(self.codeql)
 
     def FilterPackagesToTest(self, changedFilesList: list, potentialPackagesList: list) -> list:
         ''' Filter other cases that this package should be built
@@ -187,7 +200,8 @@ class SettingsManager(UpdateSettingsManager, SetupSettingsManager, PrEvalSetting
 
         The tuple should be (<workspace relative path to dsc file>, <input dictionary of dsc key value pairs>)
         '''
-        return ("QemuQ35Pkg/QemuQ35Pkg.dsc", {})
+        dsc = CommonPlatform.GetDscName(",".join(self.ActualArchitectures))
+        return (f"QemuQ35Pkg/{dsc}", {})
 
     def GetName(self):
         return "QemuQ35"
@@ -205,10 +219,17 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
 
     def AddCommandLineOptions(self, parserObj):
         ''' Add command line options to the argparser '''
+        parserObj.add_argument('-a', "--arch", dest="build_arch", type=str, default="X64",
+            help="Optional - CSV of architecture to build. "
+            "X64 will use X64 for both PEI and DXE.  IA32,X64 will use IA32 for PEI and "
+            "X64 for DXE. Default is X64")
         CommonPlatform.add_common_command_line_options(parserObj)
 
     def RetrieveCommandLineOptions(self, args):
         '''  Retrieve command line options from the argparser '''
+        shell_environment.GetBuildVars().SetValue("TARGET_ARCH"," ".join(args.build_arch.upper().split(",")), "From CmdLine")
+        dsc = CommonPlatform.GetDscName(args.build_arch)
+        shell_environment.GetBuildVars().SetValue("ACTIVE_PLATFORM", f"QemuQ35Pkg/{dsc}", "From CmdLine")
         CommonPlatform.get_common_command_line_options(self, args)
 
     def GetWorkspaceRoot(self):
@@ -227,7 +248,7 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
 
     def GetActiveScopes(self):
         ''' return tuple containing scopes that should be active for this process '''
-        return CommonPlatform.get_active_scopes(self.codeql, self.build_rust)
+        return CommonPlatform.get_active_scopes(self.codeql)
 
     def GetName(self):
         ''' Get the name of the repo, platform, or product being build '''
@@ -262,9 +283,6 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
     def SetPlatformEnv(self):
         logging.debug("PlatformBuilder SetPlatformEnv")
         self.env.SetValue("PRODUCT_NAME", "QemuQ35", "Platform Hardcoded")
-        self.env.SetValue("ACTIVE_PLATFORM", "QemuQ35Pkg/QemuQ35Pkg.dsc", "Platform Hardcoded")
-        self.env.SetValue("TARGET_ARCH", "IA32 X64", "Platform Hardcoded")
-        self.env.SetValue("BLD_*_BUILD_RUST_CODE", str(self.build_rust).upper(), "Set via `--rust` command line option")
         self.env.SetValue("EMPTY_DRIVE", "FALSE", "Default to false")
         self.env.SetValue("RUN_TESTS", "FALSE", "Default to false")
         self.env.SetValue("QEMU_HEADLESS", "FALSE", "Default to false")

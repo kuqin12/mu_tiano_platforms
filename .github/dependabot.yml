@@ -54,7 +54,9 @@ updates:
       timezone: "America/Los_Angeles"
       time: "06:00"
     ignore:
+      # Ignore dependencies that are synced from mu_devops
       - dependency-name: "microsoft/mu_devops"
+      - dependency-name: "github/codeql-action"
     commit-message:
       prefix: "GitHub Action"
     labels:
@@ -84,9 +86,12 @@ updates:
       - dependency-name: "Features/DFCI"
       - dependency-name: "Features/IPMI"
       - dependency-name: "Features/MM_SUPV"
+      - dependency-name: "Features/FFA"
       - dependency-name: "MU_BASECORE"
       - dependency-name: "Silicon/Arm/MU_TIANO"
       - dependency-name: "Silicon/Intel/MU_TIANO"
+      - dependency-name: "Silicon/Arm/HAF"
+      - dependency-name: "Silicon/Arm/TFA"
 
   - package-ecosystem: "pip"
     directory: "/"
