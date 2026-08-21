@@ -172,7 +172,8 @@
 
   # IO Libraries
   IoLib         |MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsicSev.inf
-  SerialPortLib |PcAtChipsetPkg/Library/SerialIoLib/SerialIoLib.inf
+  PlatformHookLib|MdeModulePkg/Library/BasePlatformHookLibNull/BasePlatformHookLibNull.inf
+  SerialPortLib |MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
   VirtioLib     |QemuPkg/Library/VirtioLib/VirtioLib.inf
   TdxLib        |MdePkg/Library/TdxLib/TdxLib.inf
   CcProbeLib    |MdePkg/Library/CcProbeLibNull/CcProbeLibNull.inf
@@ -303,7 +304,7 @@
   FmpDependencyLib|FmpDevicePkg/Library/FmpDependencyLib/FmpDependencyLib.inf
 
   # Debugger Libraries
-  DebugTransportLib|QemuQ35Pkg/Library/DebugTransportSerialIoWrapperLib/DebugTransportSerialIoWrapperLib.inf
+  DebugTransportLib|Features/DEBUGGER/DebuggerFeaturePkg/Library/DebugTransportSerialLib/DebugTransportSerialLib.inf
   WatchdogTimerLib|DebuggerFeaturePkg/Library/WatchdogTimerLibNull/WatchdogTimerLibNull.inf
   TransportLogControlLib|DebuggerFeaturePkg/Library/TransportLogControlLibNull/TransportLogControlLibNull.inf
 
@@ -665,6 +666,14 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdStatusCodeUseSerial|FALSE
   gEfiMdeModulePkgTokenSpaceGuid.PcdStatusCodeUseMemory|TRUE
   gPcAtChipsetPkgTokenSpaceGuid.PcdUartIoPortBaseAddress|0x3F8
+
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseMmio|TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0xFE02E000
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride|1
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterAccessWidth|8
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialPciDeviceInfo|{0xFF}
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialBaudRate|115200
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate|1843200
 
   # DEBUG_INIT      0x00000001  // Initialization
   # DEBUG_WARN      0x00000002  // Warnings
@@ -1343,34 +1352,6 @@
   # SMM_CORE
   #
   MmSupervisorPkg/Core/MmSupervisorInit.inf
-  SeaPkg/MmiEntrySea/MmiEntrySea.inf
-
-!if $(INTEL_STM_ENABLED) == TRUE
-!ifdef $(SKIP_MM_BIN_BUILD)
-!ifndef $(SKIP_STM_BUILD)
-  SeaPkg/Core/Stm.inf {
-    <LibraryClasses>
-      NULL|MdePkg/Library/StackCheckLibNull/StackCheckLibNull.inf # We do not even run it on Q35. Do not do this for production code.
-      HashLibRaw|SeaPkg/Library/HashLibRaw/HashLibRaw.inf
-      BaseCryptLib|SeaPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
-      MbedTlsLib|SeaPkg/Library/MbedTlsLib/MbedTlsLib.inf
-      IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
-      PeCoffLibNegative|SeaPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
-      DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
-      MemoryAllocationLib|SeaPkg/Library/SimpleMemoryAllocationLib/SimpleMemoryAllocationLib.inf
-    <PcdsFixedAtBuild>
-      !include $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/MmArtifacts.dsc.inc
-  }
-!endif
-  SeaPkg/Tests/ResponderValidationTest/ResponderValidationTestApp.inf {
-    <LibraryClasses>
-      HashLibRaw|SeaPkg/Library/HashLibRaw/HashLibRaw.inf
-      PeCoffLibNegative|SeaPkg/Library/BasePeCoffLibNegative/BasePeCoffLibNegative.inf
-    <PcdsFixedAtBuild>
-      !include $(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/MmArtifacts.dsc.inc
-  }
-!endif
-!endif
 
   #
   # Privileged drivers (DXE_SMM_DRIVER modules)
