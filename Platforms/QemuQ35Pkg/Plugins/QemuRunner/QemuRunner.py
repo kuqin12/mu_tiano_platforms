@@ -277,7 +277,7 @@ class QemuRunner(uefi_helper_plugin.IUefiHelperPlugin):
 
         args += " -serial none"
         args += " -chardev stdio,id=char0"
-        args += " -device serial-mm,id=serial0,addr=0xFE02E000,regshift=0,chardev=char0"
+        args += " -device serial-mm,id=serial0,addr=0xFE02E000,regshift=0,lpss=on,chardev=char0"
 
         # Connect the debug monitor to a telnet localhost port
         monitor_port = env.GetValue("MONITOR_PORT")

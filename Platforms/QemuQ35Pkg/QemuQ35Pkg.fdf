@@ -450,15 +450,7 @@ INF  QemuQ35Pkg/SmmAccess/SmmAccess2Dxe.inf
   INF  MmSupervisorPkg/Drivers/StandaloneMmIpl/PiSmmIpl.inf
 !endif
 INF  MmSupervisorPkg/Core/MmSupervisorInit.inf
-FILE MM_CORE_STANDALONE = gMmSupervisorCoreGuid {
-  SECTION PE32 = D:\Repos\sea_release\Build\DEBUG_VS2022\Binaries\PTL\DEBUG\mm_supervisor.efi
-  SECTION UI   = "MmSupervisorCore"
-}
-# INF  StandaloneMmPkg/Core/StandaloneMmCore.inf
-FILE MM_CORE_STANDALONE = gMmSupervisorUserGuid {
-  SECTION PE32 = D:\Repos\sea_release\Build\DEBUG_VS2022\Binaries\PTL\DEBUG\mm_user_core.efi
-  SECTION UI   = "MmUserCore"
-}
+!include D:\Repos\sea_release\UniversalPackagePublishing\Sea.Rust.inc.fdf
 INF  UefiCpuPkg/CpuIo2Smm/CpuIo2StandaloneMm.inf
 
 #
@@ -595,12 +587,6 @@ FILE FREEFORM = PCD(gZeroTouchPkgTokenSpaceGuid.PcdZeroTouchCertificateFile) {
   }
   FILE FREEFORM = gMmSupervisorPolicyFileGuid {
     SECTION RAW = $(POLICY_BIN_PATH)
-  }
-  FILE FREEFORM = gMmiEntrySeaFileGuid {
-    SECTION RAW = D:\Repos\sea_release\Build\DEBUG_VS2022\Binaries\PTL\DEBUG\MmiEntrySea.bin
-  }
-  FILE FREEFORM = gSeaBinFileGuid {
-    SECTION RAW = D:\Repos\sea_release\Build\DEBUG_VS2022\Binaries\PTL\DEBUG\Stm.bin
   }
 
 ################################################################################

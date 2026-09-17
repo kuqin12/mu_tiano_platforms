@@ -22,6 +22,7 @@
   OUTPUT_DIRECTORY               = Build/QemuQ35PkgX64
   SUPPORTED_ARCHITECTURES        = X64
   PEI_CRYPTO_ARCH                = X64
+  RUST_MM_SUPERVISOR             = TRUE
 
 !include QemuQ35Pkg/QemuQ35PkgCommon.dsc.inc
 

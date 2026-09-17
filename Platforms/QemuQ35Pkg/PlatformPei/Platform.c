@@ -263,7 +263,8 @@ MemMapInitialization (
     AddIoMemoryBaseSizeHob (PcdGet32 (PcdOvmfFdBaseAddress), PcdGet32 (PcdOvmfFirmwareFdSize));
   }
 
-  AddIoMemoryBaseSizeHob (0xFE02E000, BASE_4KB);
+  // 2 pages for the serial MMIO region and its configuration shadow (each 4KB)
+  AddIoMemoryBaseSizeHob (0xFE02E000, BASE_4KB * 2);
 
   //
   // Add PCI IO Port space available for PCI resource allocations.
@@ -807,6 +808,7 @@ InitializePlatform (
 
     MmSettings.HeapGuardPolicy.Fields.MmPageGuard                    = 1;
     MmSettings.HeapGuardPolicy.Fields.MmPoolGuard                    = 1;
+    DxeSettings.HeapGuardPolicy.Fields.UefiPoolGuard                 = 1;
     DxeSettings.ImageProtectionPolicy.Fields.ProtectImageFromUnknown = 1;
     // THE /NXCOMPAT DLL flag is not set on grub/shim today, so do not block loading
     // otherwise we cannot boot Linux

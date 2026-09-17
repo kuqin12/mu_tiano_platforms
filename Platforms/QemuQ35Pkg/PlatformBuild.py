@@ -294,7 +294,7 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
         # Include the MFCI test cert by default, override on the commandline with "BLD_*_SHIP_MODE=TRUE" if you want the retail MFCI cert
         self.env.SetValue("BLD_*_SHIP_MODE", "FALSE", "Default")
         self.env.SetValue("BLD_*_TARGET", "DEBUG", "Default")
-        self.env.SetValue("BLD_*_TOOL_CHAIN_TAG", "VS2022", "Default")
+        self.env.SetValue("BLD_*_TOOL_CHAIN_TAG", "CLANGPDB", "Default")
         self.env.SetValue("CONF_AUTOGEN_INCLUDE_PATH", self.edk2path.GetAbsolutePathOnThisSystemFromEdk2RelativePath("QemuQ35Pkg", "Include"), "Platform Defined")
 
         self.env.SetValue('MU_SCHEMA_DIR', self.edk2path.GetAbsolutePathOnThisSystemFromEdk2RelativePath("QemuQ35Pkg", "CfgData"), "Platform Defined")
@@ -313,13 +313,6 @@ class PlatformBuilder(UefiBuilder, BuildSettingsManager):
         if self.Helper.generate_secureboot_pcds(self) != 0:
             logging.error("Failed to generate include PCDs")
             return -1
-
-        inc_file_path = str(Path(self.ws, "Build", "QemuQ35PkgX64", "DEBUG_VS2022", "MmArtifacts.dsc.inc"))
-        if not os.path.exists(inc_file_path):
-            # create the folder if it doesn't exist
-            os.makedirs(os.path.dirname(inc_file_path), exist_ok=True)
-            with open(inc_file_path, "w"):
-                pass
 
         return 0
 
