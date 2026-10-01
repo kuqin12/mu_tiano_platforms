@@ -27,7 +27,7 @@
 
 	description = "Arm Virt StMM";
 	ffa-version = <0x00010002>; /* 31:16 - Major, 15:0 - Minor */
-	uuid = <0xdcae8d37 0x46446bf0 0xab401483 0xa3873c93>, <0xA6FADD3D 0xB44E1B36 0x108D24A4 0x53169D08>;
+	uuid = <0xdcae8d37 0x46446bf0 0xab401483 0xa3873c93>, <0xA6FADD3D 0xB44E1B36 0x108D24A4 0x53169D08>, <0x72a6be1a 0x3d4e4d41 0x4ca050b5 0x7e0b7249>;
 	id = <0x8001>;
 	execution-ctx-count = <1>;
 	exception-level = <1>; /* SEL0*/

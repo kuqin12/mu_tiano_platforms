@@ -59,6 +59,8 @@
   gQemuArmVirtPkgTokenSpaceGuid.PcdDeviceTreeAllocationPadding
   gAdvLoggerPkgTokenSpaceGuid.PcdAdvancedLoggerBase
   gAdvLoggerPkgTokenSpaceGuid.PcdAdvancedLoggerPages
+  gQemuArmVirtPkgTokenSpaceGuid.PcdRuntimeVarCacheBase
+  gQemuArmVirtPkgTokenSpaceGuid.PcdRuntimeVarCacheSize
 
 [FeaturePcd]
   gQemuPkgTokenSpaceGuid.PcdEnableMemoryProtection
@@ -66,6 +68,7 @@
 [Guids]
   gDxeMemoryProtectionSettingsGuid
   gFdtHobGuid
+  gEdkiiVariableRuntimeCacheInfoHobGuid
 
 [Pcd]
   gEfiMdePkgTokenSpaceGuid.PcdPerformanceLibraryPropertyMask  ## SOMETIMES_CONSUMES

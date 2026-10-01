@@ -273,13 +273,14 @@
   MuTelemetryHelperLib|MsWheaPkg/Library/MuTelemetryHelperLib/MuTelemetryHelperLib.inf
   UiRectangleLib|MsGraphicsPkg/Library/BaseUiRectangleLib/BaseUiRectangleLib.inf
   XenPlatformLib|QemuPkg/Library/XenPlatformLib/XenPlatformLib.inf
-  MmUnblockMemoryLib|MdePkg/Library/MmUnblockMemoryLib/MmUnblockMemoryLibNull.inf
+  MmUnblockMemoryLib|UefiCpuPkg/Library/MmUnblockMemoryLibArm/MmUnblockMemoryLib.inf
   ResetSystemLib|MdeModulePkg/Library/DxeResetSystemLib/DxeResetSystemLib.inf
   FlatPageTableLib|UefiTestingPkg/Library/FlatPageTableLib/FlatPageTableLib.inf
   ImagePropertiesRecordLib|MdeModulePkg/Library/ImagePropertiesRecordLib/ImagePropertiesRecordLib.inf
   QemuFwCfgLib|QemuPkg/Library/QemuFwCfgLib/QemuFwCfgLibMmio.inf
   PciHostBridgeUtilityLib|QemuPkg/Library/PciHostBridgeUtilityLib/PciHostBridgeUtilityLib.inf
   PciPcdProducerLib|QemuArmVirtPkg/Library/FdtPciPcdProducerLib/FdtPciPcdProducerLib.inf
+  ArmFfaMemMgmtLib|MdePkg/Library/ArmFfaMemMgmtLib/ArmFfaMemMgmtLib.inf
 
   # Math Libraries
   MathLib    |MsCorePkg/Library/MathLib/MathLib.inf
@@ -543,7 +544,7 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdTurnOffUsbLegacySupport|TRUE
 
   gEfiMdeModulePkgTokenSpaceGuid.PcdHiiOsRuntimeSupport|FALSE
-  gEfiMdeModulePkgTokenSpaceGuid.PcdEnableVariableRuntimeCache|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdEnableVariableRuntimeCache|TRUE
 
   gEmbeddedTokenSpaceGuid.PcdPrePiProduceMemoryTypeInformationHob|TRUE
   gQemuPkgTokenSpaceGuid.PcdEnableMemoryProtection|$(MEMORY_PROTECTION)
@@ -784,6 +785,12 @@
   #
   gAdvLoggerPkgTokenSpaceGuid.PcdAdvancedLoggerBase|0x40210000
 
+  #
+  # Runtime Variable Cache, has to be 64K aligned because it is runtime data.
+  #
+  gQemuArmVirtPkgTokenSpaceGuid.PcdRuntimeVarCacheBase|0x40610000
+  gQemuArmVirtPkgTokenSpaceGuid.PcdRuntimeVarCacheSize|0x60000
+
 [PcdsDynamicDefault.common]
 
   ## PL031 RealTimeClock
@@ -890,6 +897,7 @@
   ArmPlatformPkg/PeilessSec/PeilessSec.inf {
     <LibraryClasses>
       NULL|MdeModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf
+      NULL|MdeModulePkg/Universal/Variable/Pei/VariableCacheHobsLib.inf
   }
 
   #

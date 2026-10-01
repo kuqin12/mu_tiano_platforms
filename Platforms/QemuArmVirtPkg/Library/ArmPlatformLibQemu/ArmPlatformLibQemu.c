@@ -537,6 +537,20 @@ ArmPlatformGetVirtualMemoryMap (
     NULL
     );
 
+  if (PcdGet64 (PcdRuntimeVarCacheBase) != 0) {
+    // Runtime cacheable for the variable storage
+    BuildMemoryAllocationHob (
+      PcdGet64 (PcdRuntimeVarCacheBase),
+      PcdGet64 (PcdRuntimeVarCacheSize),
+      EfiRuntimeServicesData
+      );
+
+    TagMemoryAllocationHobWithGuid (
+      PcdGet64 (PcdRuntimeVarCacheBase),
+      &gEdkiiVariableRuntimeCacheInfoHobGuid
+      );
+  }
+
   // Remap the FD region as normal executable memory
   VirtualMemoryTable[2].PhysicalBase = PcdGet64 (PcdFdBaseAddress);
   VirtualMemoryTable[2].VirtualBase  = VirtualMemoryTable[2].PhysicalBase;
