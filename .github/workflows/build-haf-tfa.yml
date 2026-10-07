@@ -30,14 +30,14 @@ jobs:
       - name: Generate Token
         if: github.event_name == 'release'
         id: app-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           app-id: ${{ vars.MU_ACCESS_APP_ID }}
           private-key: ${{ secrets.MU_ACCESS_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
       - name: Checkout Code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Pip Modules
         run: |
@@ -70,7 +70,7 @@ jobs:
         if: github.event_name == 'release'
         run: |
           mkdir -p "${RUNNER_TEMP}/haf-tfa-firmware/DEF"
-          cp -a Build/QemuArmVirtPkg/DEBUG_GCC5/HafTfaBins/. "${RUNNER_TEMP}/haf-tfa-firmware/DEF"/
+          cp -a Build/QemuArmVirtPkg/DEBUG_GCC/HafTfaBins/. "${RUNNER_TEMP}/haf-tfa-firmware/DEF"/
           ls "${RUNNER_TEMP}/haf-tfa-firmware/DEF"
 
       - name: Stuart Build (TPM)
@@ -80,7 +80,7 @@ jobs:
         if: github.event_name == 'release'
         run: |
           mkdir -p "${RUNNER_TEMP}/haf-tfa-firmware/TPM"
-          cp -a Build/QemuArmVirtPkg/DEBUG_GCC5/HafTfaBins/. "${RUNNER_TEMP}/haf-tfa-firmware/TPM"/
+          cp -a Build/QemuArmVirtPkg/DEBUG_GCC/HafTfaBins/. "${RUNNER_TEMP}/haf-tfa-firmware/TPM"/
           ls "${RUNNER_TEMP}/haf-tfa-firmware/TPM"
 
       - name: Install archive tools

@@ -93,10 +93,19 @@ runs:
   # Use the cache key to attempt to restore cached submodules
   - name: Cache submodules
     if: ${{ inputs.command == 'all' || inputs.command == 'build' }}
-    uses: actions/cache@v5
+    uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
     with:
       path: .git/modules
       key: ${{ runner.os }}-${{ inputs.platform-name }}-submodules-${{ steps.submodules-hash.outputs.hash}}
+
+  - name: Redirect Hafnium submodule URLs
+    if: ${{ inputs.command == 'all' || inputs.command == 'build' }}
+    shell: bash
+    run: |
+      git config --global url."https://github.com/TF-Hafnium/hafnium-prebuilts".insteadOf "https://git.trustedfirmware.org/hafnium/prebuilts"
+      git config --global url."https://github.com/TF-Hafnium/hafnium-project-reference".insteadOf "https://git.trustedfirmware.org/hafnium/project/reference"
+      git config --global url."https://github.com/TF-Hafnium/hafnium-third_party-dtc".insteadOf "https://git.trustedfirmware.org/hafnium/third_party/dtc"
+      git config --global url."https://github.com/TF-Hafnium/hafnium-third_party-googletest".insteadOf "https://git.trustedfirmware.org/hafnium/third_party/googletest"
 
   # Stuart setup should be slightly faster if we were able to restore the cache to .git/modules
   - name: Download required submodules (stuart_setup)

@@ -30,12 +30,15 @@ stages:
   displayName: Build QEMU Platforms on Linux
 
   variables:
-  - group: tool-chain-ubuntu-gcc
+  - name: tool_chain_tag
+    value: GCC
+  - name: vm_image
+    value: ubuntu-latest
 
   jobs:
     - template: Platform-Build-Job.yml
       parameters:
-        tool_chain_tag: 'GCC5'
+        tool_chain_tag: 'GCC'
         vm_image: ubuntu-latest
         os_type: Linux
         container_image: linux-gcc
