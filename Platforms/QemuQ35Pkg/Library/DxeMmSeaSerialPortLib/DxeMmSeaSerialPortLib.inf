@@ -1,0 +1,29 @@
+## @file
+# SEA Serial Port Library.
+#
+# Copyright (c) Microsoft Corporation. All rights reserved
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION               = 0x0001001A
+  BASE_NAME                 = DxeMmSeaSerialPortLib
+  FILE_GUID                 = C6E95196-6BF2-4B6E-8FFA-40D54544B4D9
+  VERSION_STRING            = 1.0
+  PI_SPECIFICATION_VERSION  = 0x00010032
+  MODULE_TYPE               = BASE
+  LIBRARY_CLASS             = SerialPortLib|MM_CORE_STANDALONE MM_STANDALONE DXE_CORE DXE_DRIVER UEFI_APPLICATION UEFI_DRIVER
+
+[LibraryClasses]
+  BaseLib
+  IoLib
+  PlatformHookLib
+  TimerLib
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[Sources]
+  DxeMmSeaSerialPortLib.c
