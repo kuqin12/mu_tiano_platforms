@@ -273,7 +273,8 @@
   MuTelemetryHelperLib|MsWheaPkg/Library/MuTelemetryHelperLib/MuTelemetryHelperLib.inf
   UiRectangleLib|MsGraphicsPkg/Library/BaseUiRectangleLib/BaseUiRectangleLib.inf
   XenPlatformLib|QemuPkg/Library/XenPlatformLib/XenPlatformLib.inf
-  MmUnblockMemoryLib|UefiCpuPkg/Library/MmUnblockMemoryLibArm/MmUnblockMemoryLib.inf
+  MmUnblockMemoryLib|MdePkg/Library/MmUnblockMemoryLib/MmUnblockMemoryLibNull.inf
+  # StandaloneMmPkg/Library/MmUnblockMemoryLibArm/MmUnblockMemoryLibArm.inf
   ResetSystemLib|MdeModulePkg/Library/DxeResetSystemLib/DxeResetSystemLib.inf
   FlatPageTableLib|UefiTestingPkg/Library/FlatPageTableLib/FlatPageTableLib.inf
   ImagePropertiesRecordLib|MdeModulePkg/Library/ImagePropertiesRecordLib/ImagePropertiesRecordLib.inf
@@ -897,7 +898,7 @@
   ArmPlatformPkg/PeilessSec/PeilessSec.inf {
     <LibraryClasses>
       NULL|MdeModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf
-      NULL|MdeModulePkg/Universal/Variable/Pei/VariableCacheHobsLib.inf
+      # NULL|MdeModulePkg/Universal/Variable/Pei/VariableCacheHobsLib.inf
   }
 
   #
@@ -1295,7 +1296,7 @@
     <LibraryClasses>
       NULL|MdePkg/Library/StackCheckLibNull/StackCheckLibNull.inf
     <PcdsFixedAtBuild>
-      gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000000
+      # gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000000
       gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|62500000
     <PcdsPatchableInModule>
       gEfiMdeModulePkgTokenSpaceGuid.PcdFfaLibConduitSmc|FALSE
@@ -1303,11 +1304,17 @@
 
   ArmPkg/Drivers/StandaloneMmCpu/StandaloneMmCpu.inf {
     <PcdsFixedAtBuild>
-      gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000000
+      # gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000000
       gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|62500000
     <PcdsPatchableInModule>
       gEfiMdeModulePkgTokenSpaceGuid.PcdFfaLibConduitSmc|FALSE
   }
+  # StandaloneMmPkg/Drivers/MmUnblockMemArm/MmUnblockMemArm.inf {
+  #   <PcdsFixedAtBuild>
+  #     gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|62500000
+  #   <PcdsPatchableInModule>
+  #     gEfiMdeModulePkgTokenSpaceGuid.PcdFfaLibConduitSmc|FALSE
+  # }
   MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteStandaloneMm.inf {
     <PcdsFixedAtBuild>
       gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|62500000

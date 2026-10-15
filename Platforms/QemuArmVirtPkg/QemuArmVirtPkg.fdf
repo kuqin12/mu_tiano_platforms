@@ -523,6 +523,7 @@ READ_LOCK_STATUS   = TRUE
   INF MdeModulePkg/Universal/Variable/RuntimeDxe/VariableStandaloneMm.inf
   INF QemuArmVirtPkg/VirtNorFlashStandaloneMm/VirtNorFlashStandaloneMm.inf
   INF ArmPkg/Drivers/StandaloneMmCpu/StandaloneMmCpu.inf
+  # INF StandaloneMmPkg/Drivers/MmUnblockMemArm/MmUnblockMemArm.inf
 !if $(TPM2_ENABLE) == TRUE
   INF SecurityPkg/Tcg/Tcg2StandaloneMmArm/Tcg2StandaloneMmArm.inf
 !endif
