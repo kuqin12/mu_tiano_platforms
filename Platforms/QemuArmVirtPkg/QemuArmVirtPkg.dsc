@@ -273,8 +273,7 @@
   MuTelemetryHelperLib|MsWheaPkg/Library/MuTelemetryHelperLib/MuTelemetryHelperLib.inf
   UiRectangleLib|MsGraphicsPkg/Library/BaseUiRectangleLib/BaseUiRectangleLib.inf
   XenPlatformLib|QemuPkg/Library/XenPlatformLib/XenPlatformLib.inf
-  MmUnblockMemoryLib|MdePkg/Library/MmUnblockMemoryLib/MmUnblockMemoryLibNull.inf
-  # StandaloneMmPkg/Library/MmUnblockMemoryLibArm/MmUnblockMemoryLibArm.inf
+  MmUnblockMemoryLib|StandaloneMmPkg/Library/MmUnblockMemoryLibArm/MmUnblockMemoryLibArm.inf
   ResetSystemLib|MdeModulePkg/Library/DxeResetSystemLib/DxeResetSystemLib.inf
   FlatPageTableLib|UefiTestingPkg/Library/FlatPageTableLib/FlatPageTableLib.inf
   ImagePropertiesRecordLib|MdeModulePkg/Library/ImagePropertiesRecordLib/ImagePropertiesRecordLib.inf
@@ -373,6 +372,7 @@
 [LibraryClasses.common.DXE_CORE, LibraryClasses.common.DXE_RUNTIME_DRIVER, LibraryClasses.common.UEFI_DRIVER, LibraryClasses.common.DXE_DRIVER, LibraryClasses.common.UEFI_APPLICATION]
   MsUiThemeLib|MsGraphicsPkg/Library/MsUiThemeLib/Dxe/MsUiThemeLib.inf
   ArmFfaLib|MdeModulePkg/Library/ArmFfaLib/ArmFfaDxeLib.inf
+  ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
 
 [LibraryClasses.common.DXE_RUNTIME_DRIVER, LibraryClasses.common.UEFI_DRIVER, LibraryClasses.common.DXE_DRIVER, LibraryClasses.common.UEFI_APPLICATION]
   ArmFfaLib|MdeModulePkg/Library/ArmFfaLib/ArmFfaDxeLib.inf
@@ -425,7 +425,6 @@
   SecurityManagementLib|MdeModulePkg/Library/DxeSecurityManagementLib/DxeSecurityManagementLib.inf
   PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
-  ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
   PcdDatabaseLoaderLib|MdeModulePkg/Library/PcdDatabaseLoaderLib/Dxe/PcdDatabaseLoaderLibDxe.inf
   UpdateFacsHardwareSignatureLib|OemPkg/Library/UpdateFacsHardwareSignatureLib/UpdateFacsHardwareSignatureLib.inf
   MuArmGicExLib|MsCorePkg/Library/MuArmGicExLib/MuArmGicExLib.inf
@@ -580,6 +579,9 @@
   gEfiMdePkgTokenSpaceGuid.PcdUefiLibMaxPrintBufferSize|320
   gAdvLoggerPkgTokenSpaceGuid.PcdAdvancedLoggerPreMemPages|3
   gEfiMdePkgTokenSpaceGuid.PcdEnforceSecureRngAlgorithms|FALSE
+
+  gEfiMdePkgTokenSpaceGuid.PcdHardwareErrorRecordLevel|1
+  gEfiMdeModulePkgTokenSpaceGuid.PcdHwErrStorageSize|0x00001000
 
 !if $(TARGET) != RELEASE
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|$(DEBUG_PRINT_ERROR_LEVEL)
@@ -898,7 +900,7 @@
   ArmPlatformPkg/PeilessSec/PeilessSec.inf {
     <LibraryClasses>
       NULL|MdeModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf
-      # NULL|MdeModulePkg/Universal/Variable/Pei/VariableCacheHobsLib.inf
+      NULL|MdeModulePkg/Universal/Variable/Pei/VariableCacheHobsLib.inf
   }
 
   #
@@ -1309,12 +1311,12 @@
     <PcdsPatchableInModule>
       gEfiMdeModulePkgTokenSpaceGuid.PcdFfaLibConduitSmc|FALSE
   }
-  # StandaloneMmPkg/Drivers/MmUnblockMemArm/MmUnblockMemArm.inf {
-  #   <PcdsFixedAtBuild>
-  #     gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|62500000
-  #   <PcdsPatchableInModule>
-  #     gEfiMdeModulePkgTokenSpaceGuid.PcdFfaLibConduitSmc|FALSE
-  # }
+  StandaloneMmPkg/Drivers/MmUnblockMemArm/MmUnblockMemArm.inf {
+    <PcdsFixedAtBuild>
+      gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|62500000
+    <PcdsPatchableInModule>
+      gEfiMdeModulePkgTokenSpaceGuid.PcdFfaLibConduitSmc|FALSE
+  }
   MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteStandaloneMm.inf {
     <PcdsFixedAtBuild>
       gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|62500000
